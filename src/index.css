@@ -96,19 +96,22 @@
   }
 }
 
+/* Enhanced Flip Card Animation */
 .flip-card {
-  perspective: 1000px;
+  perspective: 1500px;
 }
 
 .flip-card-inner {
-  transition: transform 0.5s;
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   transform-style: preserve-3d;
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.2);
 }
 
 .flip-card-front,
 .flip-card-back {
   position: absolute;
   backface-visibility: hidden;
+  -webkit-backface-visibility: hidden; /* Safari support */
 }
 
 .flip-card-back {
@@ -119,6 +122,22 @@
   transform: rotateY(180deg);
 }
 
+/* Page turn effect */
+.page-turn {
+  position: absolute;
+  right: 0;
+  height: 100%;
+  width: 50%;
+  transform-origin: left center;
+  transition: transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1);
+  background: linear-gradient(to right, rgba(0,0,0,0.05), rgba(0,0,0,0));
+}
+
+.page-turn-active {
+  transform: rotateY(-180deg);
+}
+
+/* Confetti Animation */
 .confetti-container {
   position: fixed;
   top: 0;
@@ -134,4 +153,40 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
+}
+
+/* Additional animations */
+@keyframes scanAnimation {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(256px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes pageFlip {
+  0% { transform: rotateY(0); }
+  100% { transform: rotateY(-180deg); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* Animation classes */
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Smooth transitions */
+.smooth-transition {
+  transition: all 0.3s ease-in-out;
 }

@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, MapPin } from 'lucide-react';
+import { ArrowLeft, MapPin, Camera } from 'lucide-react';
 
 const emitatesData = [
   {
@@ -93,12 +93,18 @@ const emitatesData = [
 
 const PassportScreen = () => {
   const [isFlipped, setIsFlipped] = useState(false);
+  const [activeEmirateId, setActiveEmirateId] = useState('abu-dhabi');
   const { emirateId } = useParams();
   const navigate = useNavigate();
   
-  const emirateData = emirateId 
-    ? emitatesData.find(emirate => emirate.id === emirateId)
-    : emitatesData[0]; // Default to Abu Dhabi if no emirate specified
+  // Set the active emirate based on the URL param or default
+  React.useEffect(() => {
+    if (emirateId) {
+      setActiveEmirateId(emirateId);
+    }
+  }, [emirateId]);
+  
+  const emirateData = emitatesData.find(emirate => emirate.id === activeEmirateId) || emitatesData[0];
   
   const handleFlip = () => {
     setIsFlipped(!isFlipped);
@@ -108,22 +114,22 @@ const PassportScreen = () => {
     navigate('/scan');
   };
   
-  const handleStampClick = (locationId: number) => {
-    // In a real app, you would navigate to a stamp detail page
+  const handleStampClick = (locationId) => {
     const location = emirateData?.locations.find(l => l.id === locationId);
     if (location?.collected) {
       navigate(`/stamp/${emirateData?.id}/${locationId}`);
     }
   };
 
-  if (!emirateData) {
-    return <div>Emirate not found</div>;
-  }
+  const handleAddMemory = (locationId) => {
+    // In a real app, this would navigate to an add memory screen with the specific location
+    navigate(`/stamp-earned`);
+  };
 
   return (
     <div className="min-h-screen bg-masar-cream pb-20">
       {/* Header */}
-      <div className="bg-masar-teal text-white p-4">
+      <div className="bg-masar-gold text-white p-4">
         <div className="flex items-center">
           <Button 
             variant="ghost" 
@@ -136,110 +142,125 @@ const PassportScreen = () => {
         </div>
       </div>
       
-      {/* Emirate Selector if no emirate specified */}
-      {!emirateId && (
-        <div className="p-4">
-          <div className="flex overflow-x-auto space-x-2 pb-2">
-            {emitatesData.map((emirate) => (
-              <Button 
-                key={emirate.id}
-                variant={emirate.id === (emirateData?.id || 'abu-dhabi') ? "default" : "outline"}
-                className={emirate.id === (emirateData?.id || 'abu-dhabi') ? 
-                  "bg-masar-teal text-white" : 
-                  "border-masar-teal text-masar-teal"
-                }
-                onClick={() => navigate(`/passport/${emirate.id}`)}
-              >
-                {emirate.name}
-              </Button>
-            ))}
-          </div>
-        </div>
-      )}
-      
       {/* Passport Book */}
       <div className="px-4 py-8">
         <div 
           className={`flip-card mx-auto max-w-md aspect-[3/4] ${isFlipped ? 'flip-active' : ''}`}
-          onClick={handleFlip}
         >
-          <div className="flip-card-inner w-full h-full">
-            {/* Front Page */}
-            <div className="flip-card-front w-full h-full bg-masar-gold rounded-2xl p-5 shadow-lg">
-              <div className="bg-masar-cream rounded-lg w-full h-full flex flex-col justify-between p-4">
-                <div className="flex items-center justify-center mb-4">
+          <div className="flip-card-inner w-full h-full" onClick={handleFlip}>
+            {/* Front Cover - UAE Passport Style */}
+            <div className="flip-card-front w-full h-full bg-masar-gold rounded-2xl shadow-lg">
+              <div className="w-full h-full flex flex-col items-center justify-center p-6 relative">
+                <div className="absolute top-8 w-full flex justify-center">
                   <img 
                     src="/lovable-uploads/21b85797-a307-41e9-bf45-70a8191c7f5c.png" 
                     alt="Masar Logo" 
-                    className="h-12"
+                    className="w-32 h-auto"
                   />
                 </div>
                 
-                <div className="text-center">
-                  <h2 className="text-xl font-bold text-masar-teal">{emirateData.name}</h2>
-                  <p className="text-sm text-masar-teal/80">Tap to view stamps</p>
+                <div className="text-center mt-24">
+                  <h2 className="text-white text-3xl font-bold tracking-wider mb-2">MASAR</h2>
+                  <p className="text-white/90 text-lg mb-8">United Arab Emirates</p>
+                  <p className="text-white/80 text-sm">Digital Explorer Passport</p>
                 </div>
                 
-                <div className="relative h-1/2 mt-4 overflow-hidden rounded-lg">
-                  <img 
-                    src={emirateData.image}
-                    alt={emirateData.name}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-masar-teal/70 to-transparent flex items-end">
-                    <div className="p-4 text-white">
-                      <div className="flex items-center">
-                        <MapPin className="w-4 h-4 mr-1" />
-                        <p className="font-medium">Explore {emirateData.name}</p>
-                      </div>
-                      <p className="text-sm mt-1">
-                        {emirateData.locations.filter(loc => loc.collected).length}/{emirateData.locations.length} Stamps Collected
-                      </p>
-                    </div>
-                  </div>
+                <div className="absolute bottom-8 w-full flex justify-center">
+                  <p className="text-white/70 text-xs">Tap to open</p>
                 </div>
-                
-                <p className="text-center text-xs text-masar-teal/60 mt-4">
-                  Tap card to flip and view stamps
-                </p>
               </div>
             </div>
             
-            {/* Back Page (Stamps) */}
-            <div className="flip-card-back w-full h-full bg-masar-cream rounded-2xl p-5 shadow-lg">
-              <div className="bg-masar-mint/20 rounded-lg w-full h-full flex flex-col p-4">
-                <h2 className="text-lg font-bold text-masar-teal text-center mb-4">
-                  {emirateData.name} Stamps
-                </h2>
+            {/* Inside Pages */}
+            <div className="flip-card-back w-full h-full flex bg-white rounded-2xl shadow-lg overflow-hidden">
+              {/* Left Page - Emirates Navigation */}
+              <div className="w-1/3 h-full bg-masar-cream/30 border-r border-masar-gold/20 p-3">
+                <h3 className="text-center text-sm font-bold text-masar-teal mb-4">Emirates</h3>
+                <div className="space-y-2">
+                  {emitatesData.map((emirate) => (
+                    <Button 
+                      key={emirate.id}
+                      variant="ghost" 
+                      className={`w-full justify-start text-xs py-2 ${
+                        emirate.id === activeEmirateId 
+                          ? 'bg-masar-gold/20 text-masar-teal font-medium' 
+                          : 'text-masar-teal/70'
+                      }`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveEmirateId(emirate.id);
+                      }}
+                    >
+                      {emirate.name}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Right Page - Stamps */}
+              <div className="w-2/3 h-full bg-white p-3 overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                <div className="mb-3 flex items-center justify-between">
+                  <h2 className="text-lg font-bold text-masar-teal">{emirateData.name}</h2>
+                  <p className="text-xs text-masar-teal/60">
+                    {emirateData.locations.filter(l => l.collected).length}/{emirateData.locations.length} Stamps
+                  </p>
+                </div>
                 
-                <div className="grid grid-cols-2 gap-4 flex-1">
+                <div className="grid grid-cols-1 gap-4">
                   {emirateData.locations.map((location) => (
                     <div 
                       key={location.id}
-                      className={`rounded-lg p-3 flex flex-col items-center justify-center text-center ${
-                        location.collected ? 'bg-masar-mint/40' : 'bg-gray-100'
+                      className={`rounded-lg p-3 ${
+                        location.collected ? 'bg-masar-mint/20' : 'bg-gray-100'
                       }`}
-                      onClick={() => handleStampClick(location.id)}
                     >
-                      {location.collected ? (
-                        <div className="w-12 h-12 bg-masar-teal rounded-full flex items-center justify-center mb-2">
-                          <span className="text-white text-xl">✓</span>
+                      <div className="flex items-center">
+                        <div 
+                          className={`w-12 h-12 rounded-full flex items-center justify-center mr-3 ${
+                            location.collected ? 'bg-masar-teal' : 'bg-gray-200'
+                          }`}
+                          onClick={() => handleStampClick(location.id)}
+                        >
+                          {location.collected ? (
+                            <span className="text-white text-xl">✓</span>
+                          ) : (
+                            <span className="text-gray-400 text-xl">?</span>
+                          )}
                         </div>
-                      ) : (
-                        <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mb-2">
-                          <span className="text-gray-400 text-xl">?</span>
+                        
+                        <div className="flex-1">
+                          <p className={`font-medium ${location.collected ? 'text-masar-teal' : 'text-gray-400'}`}>
+                            {location.name}
+                          </p>
+                          
+                          {location.collected && (
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-xs text-masar-teal mt-1 p-0 h-auto flex items-center"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAddMemory(location.id);
+                              }}
+                            >
+                              <Camera className="h-3 w-3 mr-1" /> Add Memory
+                            </Button>
+                          )}
                         </div>
-                      )}
-                      <p className={`text-sm font-medium ${location.collected ? 'text-masar-teal' : 'text-gray-400'}`}>
-                        {location.name}
-                      </p>
+                        
+                        {location.collected && (
+                          <Button
+                            size="sm"
+                            className="bg-masar-teal text-white h-8 ml-2"
+                            onClick={() => handleStampClick(location.id)}
+                          >
+                            View
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
-                
-                <p className="text-center text-xs text-masar-teal/60 mt-4">
-                  Tap card to flip back
-                </p>
               </div>
             </div>
           </div>
