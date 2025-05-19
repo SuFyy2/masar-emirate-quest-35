@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -11,11 +10,38 @@ const emitatesData = [
     name: 'Abu Dhabi',
     image: 'https://images.unsplash.com/photo-1466442929976-97f336a657be?auto=format&fit=crop&w=800&q=80',
     locations: [
-      { id: 1, name: 'Sheikh Zayed Grand Mosque', collected: true, collectedDate: '15 May 2023' },
-      { id: 2, name: 'Louvre Abu Dhabi', collected: true, collectedDate: '16 May 2023' },
-      { id: 3, name: 'Ferrari World', collected: false },
-      { id: 4, name: 'Qasr Al Watan', collected: false },
-      { id: 5, name: 'Yas Marina Circuit', collected: false },
+      { 
+        id: 1, 
+        name: 'Sheikh Zayed Grand Mosque', 
+        collected: true, 
+        collectedDate: '15 May 2023',
+        icon: 'https://images.unsplash.com/photo-1466442929976-97f336a657be?auto=format&fit=crop&w=300&q=80'
+      },
+      { 
+        id: 2, 
+        name: 'Louvre Abu Dhabi', 
+        collected: true, 
+        collectedDate: '16 May 2023',
+        icon: 'https://images.unsplash.com/photo-1492321936769-b49830bc1d1e?auto=format&fit=crop&w=300&q=80'
+      },
+      { 
+        id: 3, 
+        name: 'Ferrari World', 
+        collected: false,
+        icon: 'https://images.unsplash.com/photo-1489441097428-94c102db4b66?auto=format&fit=crop&w=300&q=80'
+      },
+      { 
+        id: 4, 
+        name: 'Qasr Al Watan', 
+        collected: false,
+        icon: 'https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=300&q=80'
+      },
+      { 
+        id: 5, 
+        name: 'Yas Marina Circuit', 
+        collected: false,
+        icon: 'https://images.unsplash.com/photo-1482938289607-e9573fc25ebb?auto=format&fit=crop&w=300&q=80'
+      },
     ]
   },
   {
@@ -184,7 +210,7 @@ const PassportScreen = () => {
           >
             <ArrowLeft className="w-6 h-6" />
           </Button>
-          <h1 className="text-xl font-bold ml-2">Digital Passport</h1>
+          <h1 className="text-xl font-serif ml-2">Digital Passport</h1>
         </div>
       </div>
       
@@ -195,20 +221,20 @@ const PassportScreen = () => {
         >
           <div className="flip-card-inner w-full h-full" onClick={!isFlipped ? handleFlip : undefined}>
             {/* Front Cover - UAE Passport Style */}
-            <div className="flip-card-front w-full h-full bg-masar-gold rounded-2xl shadow-lg overflow-hidden">
-              <div className="w-full h-full flex flex-col items-center justify-center p-6 relative bg-gradient-to-b from-masar-gold to-masar-gold/80">
+            <div className="flip-card-front w-full h-full bg-masar-blue rounded-2xl shadow-lg overflow-hidden">
+              <div className="w-full h-full flex flex-col items-center justify-center p-6 relative bg-gradient-to-b from-masar-blue to-masar-blue/90">
                 <div className="absolute top-0 left-0 w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuLWNpcmNsZXMiIHg9IjAiIHk9IjAiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgcGF0dGVyblRyYW5zZm9ybT0icm90YXRlKDQ1KSI+PGNpcmNsZSBjeD0iMTAiIGN5PSIxMCIgcj0iMiIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjEpIiAvPjwvcGF0dGVybj48cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI3BhdHRlcm4tY2lyY2xlcykiIC8+PC9zdmc+')] opacity-50"></div>
                 
                 <div className="absolute top-8 w-full flex justify-center">
                   <img 
-                    src="/lovable-uploads/21b85797-a307-41e9-bf45-70a8191c7f5c.png" 
+                    src="/lovable-uploads/a92a45f1-1537-447f-81fb-efca16896380.png" 
                     alt="Masar Logo" 
                     className="w-32 h-auto"
                   />
                 </div>
                 
                 <div className="text-center mt-24 relative">
-                  <h2 className="text-white text-3xl font-bold tracking-wider mb-2">MASAR</h2>
+                  <h2 className="text-white font-serif text-3xl font-bold tracking-wider mb-2">MASAR</h2>
                   <p className="text-white/90 text-lg mb-8">United Arab Emirates</p>
                   <p className="text-white/80 text-sm uppercase tracking-widest">Digital Explorer Passport</p>
                   
@@ -232,31 +258,31 @@ const PassportScreen = () => {
             >
               {/* Left Page - User Profile */}
               <div className="w-1/2 h-full bg-masar-cream/50 border-r border-masar-gold/20 p-4 flex flex-col">
-                <h3 className="text-center text-sm font-bold text-masar-teal uppercase tracking-wider mb-6">Explorer Profile</h3>
+                <h3 className="text-center text-sm font-bold text-masar-blue uppercase tracking-wider mb-6 font-serif">Explorer Profile</h3>
                 
                 <div className="flex-1 flex flex-col items-center">
                   <div className="relative mb-4">
                     <Avatar className="w-24 h-24 border-2 border-masar-gold">
-                      <AvatarImage src="/lovable-uploads/21b85797-a307-41e9-bf45-70a8191c7f5c.png" alt="Profile" />
-                      <AvatarFallback className="bg-masar-mint text-masar-teal text-xl">M</AvatarFallback>
+                      <AvatarImage src="/lovable-uploads/984e2ec2-cb8a-4d95-afeb-0e2d2195bd08.png" alt="Hamdoon Profile" />
+                      <AvatarFallback className="bg-masar-teal text-white text-xl">H</AvatarFallback>
                     </Avatar>
                     <div className="absolute -bottom-2 -right-2 bg-masar-teal text-white text-xs rounded-full w-8 h-8 flex items-center justify-center border-2 border-white">
                       <span>VIP</span>
                     </div>
                   </div>
                   
-                  <h4 className="font-bold text-masar-teal text-lg mb-1">Ahmed Mohammed</h4>
-                  <p className="text-masar-teal/70 text-sm mb-4">Explorer since May 2023</p>
+                  <h4 className="font-bold text-masar-blue text-lg mb-1">Ahmed Mohammed</h4>
+                  <p className="text-masar-blue/70 text-sm mb-4">Explorer since May 2023</p>
                   
                   <div className="w-full bg-white rounded-lg p-3 shadow-sm mb-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-masar-teal text-sm">Total Stamps</span>
+                      <span className="text-masar-blue text-sm">Total Stamps</span>
                       <span className="text-masar-gold font-bold">{totalStampsCollected}</span>
                     </div>
                   </div>
                   
                   <div className="w-full">
-                    <h5 className="text-sm font-medium text-masar-teal mb-2">Emirates Visited</h5>
+                    <h5 className="text-sm font-medium text-masar-blue mb-2">Emirates Visited</h5>
                     <div className="space-y-2">
                       {emitatesData.map((emirate) => {
                         const stampsCollected = emirate.locations.filter(l => l.collected).length;
@@ -266,8 +292,8 @@ const PassportScreen = () => {
                               key={emirate.id}
                               className={`text-xs flex items-center justify-between p-2 rounded ${
                                 emirate.id === activeEmirateId 
-                                  ? 'bg-masar-gold/20 text-masar-teal font-medium' 
-                                  : 'text-masar-teal/70'
+                                  ? 'bg-masar-gold/20 text-masar-blue font-medium' 
+                                  : 'text-masar-blue/70'
                               }`}
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -291,7 +317,7 @@ const PassportScreen = () => {
                     <svg viewBox="0 0 100 10" preserveAspectRatio="none" className="h-full w-full">
                       <path
                         d="M0,10 C30,0 70,0 100,10 L100,0 L0,0 Z"
-                        fill="#A8E0D1"
+                        fill="#00A8A8"
                         fillOpacity="0.3"
                       />
                     </svg>
@@ -301,10 +327,10 @@ const PassportScreen = () => {
               
               {/* Right Page - Stamps */}
               <div className="w-1/2 h-full bg-white p-4 flex flex-col relative">
-                <h3 className="text-center text-sm font-bold text-masar-teal uppercase tracking-wider mb-2">
+                <h3 className="text-center font-serif text-lg font-bold text-masar-blue uppercase tracking-wider mb-2">
                   {emirateData.name}
                 </h3>
-                <p className="text-center text-xs text-masar-teal/60 mb-4">
+                <p className="text-center text-xs text-masar-blue/60 mb-4">
                   {emirateData.locations.filter(l => l.collected).length}/{emirateData.locations.length} Stamps
                 </p>
                 
@@ -312,7 +338,7 @@ const PassportScreen = () => {
                 {currentPage > 0 && (
                   <Button
                     variant="ghost" 
-                    className="absolute left-0 top-1/2 -translate-y-1/2 text-masar-teal h-auto p-1"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 text-masar-blue h-auto p-1"
                     onClick={(e) => {
                       e.stopPropagation();
                       handlePrevEmirate();
@@ -325,7 +351,7 @@ const PassportScreen = () => {
                 {currentPage < emitatesData.length - 1 && (
                   <Button
                     variant="ghost" 
-                    className="absolute right-0 top-1/2 -translate-y-1/2 text-masar-teal h-auto p-1"
+                    className="absolute right-0 top-1/2 -translate-y-1/2 text-masar-blue h-auto p-1"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleNextEmirate();
@@ -336,13 +362,13 @@ const PassportScreen = () => {
                 )}
                 
                 <div className="flex-1 overflow-y-auto">
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-4">
                     {emirateData.locations.map((location) => (
                       <div 
                         key={location.id}
-                        className={`aspect-square rounded-full flex flex-col items-center justify-center p-1 relative overflow-hidden ${
+                        className={`aspect-square rounded-full flex flex-col items-center justify-center relative overflow-hidden ${
                           location.collected 
-                            ? 'bg-masar-mint cursor-pointer' 
+                            ? 'bg-masar-gold/20 cursor-pointer' 
                             : 'bg-gray-100 opacity-80'
                         }`}
                         onClick={(e) => {
@@ -350,28 +376,56 @@ const PassportScreen = () => {
                           handleStampClick(location.id);
                         }}
                       >
-                        <div className="absolute inset-0 border-4 rounded-full border-dashed border-masar-teal/20 flex items-center justify-center">
+                        {/* Stamp border - dotted circle */}
+                        <div className="absolute inset-0 border-4 rounded-full border-dashed border-masar-blue/20 flex items-center justify-center">
                           {!location.collected && (
-                            <Lock className="h-6 w-6 text-gray-400" />
+                            <Lock className="h-6 w-6 text-masar-red" />
                           )}
                         </div>
                         
                         {location.collected && (
                           <>
-                            <div className="absolute top-0 left-0 right-0 h-full w-full bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCI+PGNpcmNsZSBjeD0iMjUiIGN5PSIyNSIgcj0iMjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgxMywgMTU1LCAxMzgsIDAuMikiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWRhc2hhcnJheT0iNSAzIiAvPjwvc3ZnPg==')] opacity-50 animate-spin-slow"></div>
-                            <div className="z-10 text-center">
-                              <div className="text-xs font-bold text-masar-teal">
+                            {/* Stamp background with icon */}
+                            <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+                              <div className="absolute inset-0 bg-masar-gold/20"></div>
+                              <div className="w-3/4 h-3/4 rounded-full overflow-hidden">
+                                <img 
+                                  src={location.icon} 
+                                  alt={location.name}
+                                  className="w-full h-full object-cover opacity-90"
+                                />
+                              </div>
+                            </div>
+                            
+                            {/* Stamp details */}
+                            <div className="absolute bottom-0 left-0 right-0 bg-masar-teal/80 py-1 px-2">
+                              <div className="text-[10px] text-center text-white font-medium">
                                 {location.name}
                               </div>
-                              <div className="text-[10px] text-masar-teal/70 mt-1">
+                              <div className="text-[8px] text-center text-white/80">
                                 {location.collectedDate}
                               </div>
+                            </div>
+                            
+                            {/* Add memory button */}
+                            <div className="absolute top-0 right-0 p-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 w-6 p-0 text-masar-blue bg-white/80 rounded-full"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleAddMemory(location.id);
+                                }}
+                              >
+                                <Camera className="h-3 w-3" />
+                              </Button>
                             </div>
                           </>
                         )}
                         
                         {!location.collected && (
-                          <div className="text-xs text-center text-gray-500 mt-8">
+                          <div className="text-xs text-center text-gray-500 mt-8 px-2">
                             {location.name}
                           </div>
                         )}
@@ -381,7 +435,7 @@ const PassportScreen = () => {
                 </div>
                 
                 {/* Page number */}
-                <div className="text-center text-xs text-masar-teal/50 pt-2 pb-1">
+                <div className="text-center text-xs text-masar-blue/50 pt-2 pb-1">
                   {currentPage + 1}/{emitatesData.length}
                 </div>
                 
@@ -389,7 +443,7 @@ const PassportScreen = () => {
                   <svg viewBox="0 0 100 10" preserveAspectRatio="none" className="h-full w-full transform rotate-180">
                     <path
                       d="M0,10 C30,0 70,0 100,10 L100,0 L0,0 Z"
-                      fill="#A8E0D1"
+                      fill="#00A8A8"
                       fillOpacity="0.3"
                     />
                   </svg>
@@ -404,7 +458,7 @@ const PassportScreen = () => {
           <div className="text-center mt-4">
             <Button 
               variant="outline" 
-              className="text-masar-teal border-masar-teal/50"
+              className="text-masar-blue border-masar-blue/50 font-semibold"
               onClick={handleFlip}
             >
               Close Passport
@@ -417,7 +471,7 @@ const PassportScreen = () => {
       <div className="fixed bottom-4 left-0 right-0 flex justify-center">
         <Button 
           onClick={handleScanClick}
-          className="bg-masar-teal hover:bg-masar-teal/90 text-white px-8 py-4 rounded-full h-auto"
+          className="bg-masar-teal hover:bg-masar-teal/90 text-white px-8 py-4 rounded-full h-auto font-semibold"
         >
           Scan for New Stamp
         </Button>

@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Poppins:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -5,83 +6,83 @@
 
 @layer base {
   :root {
-    --background: 50 50% 96%;    /* Cream background */
-    --foreground: 174 85% 33%;   /* Teal text color */
+    --background: 37 33% 97%;     /* Cream background #FDF8F3 */
+    --foreground: 200 82% 22%;    /* Deep blue text #004369 */
 
     --card: 0 0% 100%;
-    --card-foreground: 174 85% 33%;
+    --card-foreground: 200 82% 22%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 174 85% 33%;
+    --popover-foreground: 200 82% 22%;
 
-    --primary: 174 85% 33%;      /* Teal as primary */
-    --primary-foreground: 50 50% 96%;
+    --primary: 200 82% 22%;       /* Deep blue as primary #004369 */
+    --primary-foreground: 37 33% 97%;
 
-    --secondary: 42 70% 59%;     /* Gold as secondary */
+    --secondary: 41 64% 55%;      /* Gold as secondary #D9A441 */
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 165 47% 77%;        /* Light mint */
-    --muted-foreground: 174 85% 33%;
+    --muted: 180 100% 33%;        /* Teal as muted #00A8A8 */
+    --muted-foreground: 37 33% 97%;
 
-    --accent: 42 70% 59%;        /* Gold as accent */
+    --accent: 41 64% 55%;         /* Gold as accent #D9A441 */
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 350 79% 49%;   /* Red #DB1F48 */
+    --destructive-foreground: 37 33% 97%;
 
-    --border: 165 47% 77%;       /* Mint border */
-    --input: 165 47% 77%;
-    --ring: 174 85% 33%;
+    --border: 180 100% 33%;       /* Teal border */
+    --input: 180 100% 33%;
+    --ring: 200 82% 22%;
 
     --radius: 1rem;              /* Rounded corners */
 
-    --sidebar-background: 174 85% 33%;
-    --sidebar-foreground: 50 50% 96%;
-    --sidebar-primary: 42 70% 59%;
+    --sidebar-background: 200 82% 22%;
+    --sidebar-foreground: 37 33% 97%;
+    --sidebar-primary: 41 64% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 165 47% 77%;
-    --sidebar-accent-foreground: 174 85% 33%;
-    --sidebar-border: 174 85% 33%;
-    --sidebar-ring: 42 70% 59%;
+    --sidebar-accent: 180 100% 33%;
+    --sidebar-accent-foreground: 200 82% 22%;
+    --sidebar-border: 200 82% 22%;
+    --sidebar-ring: 41 64% 55%;
   }
 
   .dark {
-    --background: 174 85% 20%;   /* Darker teal background */
-    --foreground: 50 50% 96%;
+    --background: 200 82% 15%;    /* Darker blue background */
+    --foreground: 37 33% 97%;
 
-    --card: 174 85% 15%;
-    --card-foreground: 50 50% 96%;
+    --card: 200 82% 10%;
+    --card-foreground: 37 33% 97%;
 
-    --popover: 174 85% 15%;
-    --popover-foreground: 50 50% 96%;
+    --popover: 200 82% 10%;
+    --popover-foreground: 37 33% 97%;
 
-    --primary: 42 70% 59%;       /* Gold as primary in dark mode */
+    --primary: 41 64% 55%;        /* Gold as primary in dark mode */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 174 85% 33%;    /* Teal as secondary in dark mode */
-    --secondary-foreground: 50 50% 96%;
+    --secondary: 200 82% 22%;     /* Deep blue as secondary in dark mode */
+    --secondary-foreground: 37 33% 97%;
 
-    --muted: 174 85% 25%;
-    --muted-foreground: 50 50% 96%;
+    --muted: 200 82% 18%;
+    --muted-foreground: 37 33% 97%;
 
-    --accent: 165 47% 77%;       /* Mint as accent in dark mode */
-    --accent-foreground: 174 85% 33%;
+    --accent: 180 100% 33%;       /* Teal as accent in dark mode */
+    --accent-foreground: 200 82% 22%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 50 50% 96%;
+    --destructive: 350 79% 40%;
+    --destructive-foreground: 37 33% 97%;
 
-    --border: 174 85% 40%;
-    --input: 174 85% 40%;
-    --ring: 42 70% 59%;
+    --border: 200 82% 35%;
+    --input: 200 82% 35%;
+    --ring: 41 64% 55%;
     
-    --sidebar-background: 174 85% 15%;
-    --sidebar-foreground: 50 50% 96%;
-    --sidebar-primary: 42 70% 59%;
+    --sidebar-background: 200 82% 10%;
+    --sidebar-foreground: 37 33% 97%;
+    --sidebar-primary: 41 64% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 165 47% 77%;
-    --sidebar-accent-foreground: 174 85% 20%;
-    --sidebar-border: 174 85% 33%;
-    --sidebar-ring: 42 70% 59%;
+    --sidebar-accent: 180 100% 33%;
+    --sidebar-accent-foreground: 200 82% 15%;
+    --sidebar-border: 200 82% 22%;
+    --sidebar-ring: 41 64% 55%;
   }
 }
 
@@ -93,6 +94,20 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Poppins', 'Segoe UI', sans-serif;
+  }
+
+  h1, h2, h3 {
+    font-family: 'DM Serif Display', serif;
+  }
+
+  h4, h5, h6 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500; /* Medium */
+  }
+
+  button, .cta {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600; /* SemiBold */
   }
 }
 
