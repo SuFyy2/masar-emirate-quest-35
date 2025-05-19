@@ -46,6 +46,7 @@ const ProfileScreen = () => {
   const navigate = useNavigate();
   const [userName, setUserName] = useState('Explorer');
   const [isNewOrDemoUser, setIsNewOrDemoUser] = useState(false);
+  const [isDemoUser, setIsDemoUser] = useState(false);
   
   useEffect(() => {
     // Get the current username from localStorage whenever component mounts
@@ -55,6 +56,7 @@ const ProfileScreen = () => {
       
       // Check if demo user
       if (storedUserName === 'Demo User') {
+        setIsDemoUser(true);
         setIsNewOrDemoUser(true);
       } else {
         // Check if new user (first time viewing profile)
@@ -83,6 +85,10 @@ const ProfileScreen = () => {
     localStorage.removeItem('userName');
     localStorage.removeItem('hasViewedHomeScreen');
     localStorage.removeItem('hasViewedProfileBefore');
+    navigate('/login');
+  };
+  
+  const handleLogin = () => {
     navigate('/login');
   };
 
@@ -151,10 +157,16 @@ const ProfileScreen = () => {
             </div>)}
         </div>
         
-        {/* Settings & Logout */}
-        <Button variant="outline" onClick={handleLogout} className="w-full border-masar-teal text-masar-teal">
-          Log Out
-        </Button>
+        {/* Show Login button for demo users, Logout button for regular users */}
+        {isDemoUser ? (
+          <Button variant="outline" onClick={handleLogin} className="w-full border-masar-teal text-masar-teal">
+            Log In
+          </Button>
+        ) : (
+          <Button variant="outline" onClick={handleLogout} className="w-full border-masar-teal text-masar-teal">
+            Log Out
+          </Button>
+        )}
       </div>
       
       {/* Bottom Navigation */}
