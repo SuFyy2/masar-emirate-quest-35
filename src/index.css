@@ -177,6 +177,11 @@
   50% { opacity: 0.6; }
 }
 
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 /* Animation classes */
 .animate-float {
   animation: float 3s ease-in-out infinite;
@@ -184,6 +189,10 @@
 
 .animate-pulse-slow {
   animation: pulse 2s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 20s linear infinite;
 }
 
 /* Smooth transitions */
