@@ -153,7 +153,7 @@ const HomeScreen = () => {
                   <Button onClick={e => {
                 e.stopPropagation();
                 navigate(`/passport/${emirate.id}`);
-              }} className="w-full bg-masar-mint hover:bg-masar-mint/90 text-masar-teal">
+              }} className="w-full bg-masar-mint hover:bg-masar-mint/90 text-masar-red">
                     View Stamps
                   </Button>
                 </div>
@@ -164,7 +164,7 @@ const HomeScreen = () => {
       
       {/* Scan Button */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex justify-center">
-        <Button onClick={handleScanClick} className="bg-masar-teal hover:bg-masar-teal/90 text-white px-8 py-6 rounded-full h-auto text-lg font-semibold">
+        <Button onClick={handleScanClick} className="px-8 py-6 rounded-full h-auto text-lg font-semibold text-masar-cream bg-masar-red">
           Scan for New Stamp
         </Button>
       </div>
