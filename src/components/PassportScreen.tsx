@@ -291,7 +291,7 @@ const PassportScreen = () => {
                   <p className="text-white/90 text-lg mb-8">United Arab Emirates</p>
                   <p className="text-white/80 text-sm uppercase tracking-widest">Digital Explorer Passport</p>
                   
-                  <div className="mt-10 border-b-2 border-t-2 border-white/30 py-4 px-6">
+                  <div className="mt-10 border-b-2 border-t-2 border-white/30 py-4 px-6 bg-slate-800">
                     <div className="text-white text-center uppercase tracking-widest text-sm">Passport</div>
                   </div>
                 </div>
