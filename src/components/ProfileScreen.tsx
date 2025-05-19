@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -44,22 +45,44 @@ const emitatesData = [{
 const ProfileScreen = () => {
   const navigate = useNavigate();
   const [userName, setUserName] = useState('Explorer');
+  const [isNewOrDemoUser, setIsNewOrDemoUser] = useState(false);
   
   useEffect(() => {
     // Get the current username from localStorage whenever component mounts
     const storedUserName = localStorage.getItem('userName');
     if (storedUserName) {
       setUserName(storedUserName);
+      
+      // Check if demo user
+      if (storedUserName === 'Demo User') {
+        setIsNewOrDemoUser(true);
+      } else {
+        // Check if new user (first time viewing profile)
+        const hasViewedProfileBefore = localStorage.getItem('hasViewedProfileBefore');
+        if (!hasViewedProfileBefore) {
+          localStorage.setItem('hasViewedProfileBefore', 'true');
+          setIsNewOrDemoUser(true);
+        }
+      }
     }
   }, []);
 
-  const totalCollected = emitatesData.reduce((sum, emirate) => sum + emirate.collected, 0);
+  // For new/demo users, show 0 collected stamps
+  let totalCollected = emitatesData.reduce((sum, emirate) => sum + emirate.collected, 0);
   const totalStamps = emitatesData.reduce((sum, emirate) => sum + emirate.total, 0);
-  const completionPercentage = Math.round(totalCollected / totalStamps * 100);
+  
+  // Reset progress for new and demo users
+  if (isNewOrDemoUser) {
+    totalCollected = 0;
+  }
+  
+  const completionPercentage = isNewOrDemoUser ? 0 : Math.round(totalCollected / totalStamps * 100);
 
   const handleLogout = () => {
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('userName');
+    localStorage.removeItem('hasViewedHomeScreen');
+    localStorage.removeItem('hasViewedProfileBefore');
     navigate('/login');
   };
 
@@ -96,7 +119,7 @@ const ProfileScreen = () => {
               <Map className="w-5 h-5 text-masar-teal mr-2" />
               <h3 className="font-medium text-masar-teal">Total Stamps</h3>
             </div>
-            <p className="text-2xl font-bold text-masar-teal">{totalCollected}/{totalStamps}</p>
+            <p className="text-2xl font-bold text-masar-teal">{isNewOrDemoUser ? 0 : totalCollected}/{totalStamps}</p>
           </Card>
           
           <Card className="p-4 bg-masar-gold/20">
@@ -105,7 +128,7 @@ const ProfileScreen = () => {
               <h3 className="font-medium text-masar-teal">Emirates</h3>
             </div>
             <p className="text-2xl font-bold text-masar-teal">
-              {emitatesData.filter(e => e.collected > 0).length}/{emitatesData.length}
+              {isNewOrDemoUser ? 0 : emitatesData.filter(e => e.collected > 0).length}/{emitatesData.length}
             </p>
           </Card>
         </div>
@@ -117,12 +140,12 @@ const ProfileScreen = () => {
               <div className="flex justify-between items-center mb-2">
                 <h4 className="font-medium text-masar-blue">{emirate.name}</h4>
                 <span className="text-sm text-masar-gold">
-                  {emirate.collected}/{emirate.total} stamps
+                  {isNewOrDemoUser ? 0 : emirate.collected}/{emirate.total} stamps
                 </span>
               </div>
               <div className="h-2 bg-gray-100 rounded-full">
                 <div style={{
-              width: `${emirate.collected / emirate.total * 100}%`
+              width: `${isNewOrDemoUser ? 0 : (emirate.collected / emirate.total * 100)}%`
             }} className="h-2 rounded-full bg-masar-teal" />
               </div>
             </div>)}

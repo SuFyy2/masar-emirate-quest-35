@@ -125,6 +125,16 @@ const AuthScreen = () => {
             // For demo purposes, skip login
             localStorage.setItem('isAuthenticated', 'true');
             localStorage.setItem('userName', 'Demo User');
+            
+            // Reset progress tracking for demo user
+            localStorage.removeItem('hasViewedHomeScreen');
+            localStorage.removeItem('hasViewedProfileBefore');
+            
+            toast({
+              title: "Welcome, Demo User!",
+              description: "You're using a demo account with no progress"
+            });
+            
             navigate('/home');
           }} className="text-masar-gold hover:text-masar-gold/80">
               Continue as Demo User

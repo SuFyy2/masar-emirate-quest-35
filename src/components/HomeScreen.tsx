@@ -4,69 +4,105 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Map, Compass, User } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-const emitatesData = [{
-  id: 'abu-dhabi',
-  name: 'Abu Dhabi',
-  image: 'https://images.unsplash.com/photo-1466442929976-97f336a657be?auto=format&fit=crop&w=800&q=80',
-  stampCount: 5,
-  collectedStamps: 2
-}, {
-  id: 'dubai',
-  name: 'Dubai',
-  image: 'https://images.unsplash.com/photo-1469041797191-50ace28483c3?auto=format&fit=crop&w=800&q=80',
-  stampCount: 5,
-  collectedStamps: 3
-}, {
-  id: 'sharjah',
-  name: 'Sharjah',
-  image: 'https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=800&q=80',
-  stampCount: 5,
-  collectedStamps: 0
-}, {
-  id: 'ajman',
-  name: 'Ajman',
-  image: 'https://images.unsplash.com/photo-1482938289607-e9573fc25ebb?auto=format&fit=crop&w=800&q=80',
-  stampCount: 5,
-  collectedStamps: 1
-}, {
-  id: 'umm-al-quwain',
-  name: 'Umm Al Quwain',
-  image: 'https://images.unsplash.com/photo-1466442929976-97f336a657be?auto=format&fit=crop&w=800&q=80',
-  stampCount: 5,
-  collectedStamps: 0
-}, {
-  id: 'fujairah',
-  name: 'Fujairah',
-  image: 'https://images.unsplash.com/photo-1482938289607-e9573fc25ebb?auto=format&fit=crop&w=800&q=80',
-  stampCount: 5,
-  collectedStamps: 0
-}, {
-  id: 'ras-al-khaimah',
-  name: 'Ras Al Khaimah',
-  image: 'https://images.unsplash.com/photo-1469041797191-50ace28483c3?auto=format&fit=crop&w=800&q=80',
-  stampCount: 5,
-  collectedStamps: 0
-}];
+
+const emitatesData = [
+  {
+    id: 'abu-dhabi',
+    name: 'Abu Dhabi',
+    image: 'https://images.unsplash.com/photo-1466442929976-97f336a657be?auto=format&fit=crop&w=800&q=80',
+    stampCount: 5,
+    collectedStamps: 2
+  }, {
+    id: 'dubai',
+    name: 'Dubai',
+    image: 'https://images.unsplash.com/photo-1469041797191-50ace28483c3?auto=format&fit=crop&w=800&q=80',
+    stampCount: 5,
+    collectedStamps: 3
+  }, {
+    id: 'sharjah',
+    name: 'Sharjah',
+    image: 'https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=800&q=80',
+    stampCount: 5,
+    collectedStamps: 0
+  }, {
+    id: 'ajman',
+    name: 'Ajman',
+    image: 'https://images.unsplash.com/photo-1482938289607-e9573fc25ebb?auto=format&fit=crop&w=800&q=80',
+    stampCount: 5,
+    collectedStamps: 1
+  }, {
+    id: 'umm-al-quwain',
+    name: 'Umm Al Quwain',
+    image: 'https://images.unsplash.com/photo-1466442929976-97f336a657be?auto=format&fit=crop&w=800&q=80',
+    stampCount: 5,
+    collectedStamps: 0
+  }, {
+    id: 'fujairah',
+    name: 'Fujairah',
+    image: 'https://images.unsplash.com/photo-1482938289607-e9573fc25ebb?auto=format&fit=crop&w=800&q=80',
+    stampCount: 5,
+    collectedStamps: 0
+  }, {
+    id: 'ras-al-khaimah',
+    name: 'Ras Al Khaimah',
+    image: 'https://images.unsplash.com/photo-1469041797191-50ace28483c3?auto=format&fit=crop&w=800&q=80',
+    stampCount: 5,
+    collectedStamps: 0
+  }
+];
+
 const tips = ["Visit Al Ain Zoo in Abu Dhabi for a special stamp!", "Scan QR codes at the Dubai Museum for exclusive stamps.", "Don't forget to explore the Heart of Sharjah for unique stamps!"];
+
 const HomeScreen = () => {
   const [activeEmirateIndex, setActiveEmirateIndex] = useState(0);
   const [currentTip, setCurrentTip] = useState(0);
   const navigate = useNavigate();
+  const [userData, setUserData] = useState({
+    isNewUser: false,
+    isDemoUser: false,
+  });
+  
   useEffect(() => {
+    // Check if user is demo user or new user
+    const userName = localStorage.getItem('userName');
+    const currentUserEmail = localStorage.getItem('currentUserEmail');
+    const isNewUser = !localStorage.getItem('hasViewedHomeScreen');
+    const isDemoUser = userName === 'Demo User';
+    
+    if (isNewUser) {
+      // Mark that user has seen the home screen
+      localStorage.setItem('hasViewedHomeScreen', 'true');
+    }
+    
+    setUserData({
+      isNewUser,
+      isDemoUser
+    });
+    
     // Rotate tips every 6 seconds
     const tipInterval = setInterval(() => {
       setCurrentTip(prev => (prev + 1) % tips.length);
     }, 6000);
     return () => clearInterval(tipInterval);
   }, []);
-  const totalCollectedStamps = emitatesData.reduce((sum, emirate) => sum + emirate.collectedStamps, 0);
+  
+  // Calculate total stamps (show 0% for new users and demo users)
+  let totalCollectedStamps = emitatesData.reduce((sum, emirate) => sum + emirate.collectedStamps, 0);
   const totalStamps = emitatesData.reduce((sum, emirate) => sum + emirate.stampCount, 0);
+  
+  // Reset progress to 0 for new and demo users
+  if (userData.isNewUser || userData.isDemoUser) {
+    totalCollectedStamps = 0;
+  }
+  
   const handlePassportClick = () => {
     navigate('/passport');
   };
+  
   const handleScanClick = () => {
     navigate('/scan');
   };
+
   return <div className="min-h-screen bg-masar-cream pb-20">
       {/* Header */}
       <div className="bg-masar-blue text-white p-6 rounded-b-2xl">
@@ -111,12 +147,12 @@ const HomeScreen = () => {
               <div className="flex items-center justify-between">
                 <span className="text-masar-blue font-medium">Progress</span>
                 <span className="text-masar-blue font-semibold">
-                  {Math.round(totalCollectedStamps / totalStamps * 100)}%
+                  {userData.isNewUser || userData.isDemoUser ? 0 : Math.round(totalCollectedStamps / totalStamps * 100)}%
                 </span>
               </div>
               <div className="h-2 bg-gray-200 rounded-full w-full mt-2">
                 <div className="h-2 bg-masar-teal rounded-full" style={{
-                width: `${totalCollectedStamps / totalStamps * 100}%`
+                width: `${userData.isNewUser || userData.isDemoUser ? 0 : (totalCollectedStamps / totalStamps * 100)}%`
               }} />
               </div>
             </div>
@@ -140,10 +176,10 @@ const HomeScreen = () => {
                       <h3 className="text-white font-bold">{emirate.name}</h3>
                       <div className="flex items-center mt-1">
                         <div className="flex space-x-1">
-                          {[...Array(emirate.stampCount)].map((_, i) => <div key={i} className={`w-3 h-3 rounded-full ${i < emirate.collectedStamps ? 'bg-masar-gold' : 'bg-white/30'}`} />)}
+                          {[...Array(emirate.stampCount)].map((_, i) => <div key={i} className={`w-3 h-3 rounded-full ${(userData.isNewUser || userData.isDemoUser) ? 'bg-white/30' : (i < emirate.collectedStamps ? 'bg-masar-gold' : 'bg-white/30')}`} />)}
                         </div>
                         <span className="ml-2 text-xs text-white">
-                          {emirate.collectedStamps}/{emirate.stampCount}
+                          {userData.isNewUser || userData.isDemoUser ? 0 : emirate.collectedStamps}/{emirate.stampCount}
                         </span>
                       </div>
                     </div>
