@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, User, Map, Compass, Star } from 'lucide-react';
+
 const emitatesData = [{
   id: 'abu-dhabi',
   name: 'Abu Dhabi',
@@ -39,18 +40,31 @@ const emitatesData = [{
   collected: 0,
   total: 5
 }];
+
 const ProfileScreen = () => {
   const navigate = useNavigate();
+  const [userName, setUserName] = useState('Explorer');
+  
+  useEffect(() => {
+    // Get the current username from localStorage whenever component mounts
+    const storedUserName = localStorage.getItem('userName');
+    if (storedUserName) {
+      setUserName(storedUserName);
+    }
+  }, []);
+
   const totalCollected = emitatesData.reduce((sum, emirate) => sum + emirate.collected, 0);
   const totalStamps = emitatesData.reduce((sum, emirate) => sum + emirate.total, 0);
   const completionPercentage = Math.round(totalCollected / totalStamps * 100);
-  const userName = localStorage.getItem('userName') || 'Explorer';
+
   const handleLogout = () => {
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('userName');
     navigate('/login');
   };
-  return <div className="min-h-screen bg-masar-cream pb-20">
+
+  return (
+    <div className="min-h-screen bg-masar-cream pb-20">
       {/* Header */}
       <div className="text-white p-4 bg-masar-blue">
         <div className="flex items-center">
@@ -139,6 +153,8 @@ const ProfileScreen = () => {
           </Button>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default ProfileScreen;

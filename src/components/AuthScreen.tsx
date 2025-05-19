@@ -27,9 +27,9 @@ const AuthScreen = () => {
     if (isLogin) {
       // Check if this user has signed up before
       const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-      const userExists = registeredUsers.some((user: any) => user.email === email);
+      const foundUser = registeredUsers.find((user: any) => user.email === email);
       
-      if (!userExists) {
+      if (!foundUser) {
         toast({
           title: "Account not found",
           description: "Please sign up first",
@@ -38,9 +38,10 @@ const AuthScreen = () => {
         return;
       }
       
-      // User exists, proceed with login
+      // User exists, proceed with login and set the userName from the stored user data
       localStorage.setItem('isAuthenticated', 'true');
       localStorage.setItem('currentUserEmail', email);
+      localStorage.setItem('userName', foundUser.name); // Set the username from the found user
       
       toast({
         title: "Login successful!",
