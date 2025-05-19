@@ -305,8 +305,8 @@ const PassportScreen = () => {
             {/* Inside Pages */}
             <div className="flip-card-back w-full h-full flex bg-white rounded-2xl shadow-lg overflow-hidden" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
               {/* Left Page - User Profile */}
-              <div className="w-1/2 h-full border-r border-masar-gold/20 p-4 flex flex-col bg-teal-100">
-                <h3 className="text-center text-sm font-bold text-masar-blue uppercase tracking-wider mb-6 font-serif">Explorer Profile</h3>
+              <div className="w-1/2 h-full border-r border-masar-gold/20 p-4 flex flex-col bg-masar-teal">
+                <h3 className="text-center text-sm font-bold uppercase tracking-wider mb-6 font-serif text-masar-cream">Explorer Profile</h3>
                 
                 <div className="flex-1 flex flex-col items-center">
                   <div className="relative mb-4">
@@ -319,18 +319,18 @@ const PassportScreen = () => {
                     </div>
                   </div>
                   
-                  <h4 className="font-bold text-masar-blue text-lg mb-1">Ahmed Mohammed</h4>
-                  <p className="text-masar-blue/70 text-sm mb-4">Explorer since May 2023</p>
+                  <h4 className="font-bold text-lg mb-1 text-masar-cream">Ahmed Mohammed</h4>
+                  <p className="text-sm mb-4 text-masar-cream">Explorer since May 2023</p>
                   
                   <div className="w-full bg-white rounded-lg p-3 shadow-sm mb-4">
                     <div className="flex items-center justify-between">
                       <span className="text-masar-blue text-sm">Total Stamps</span>
-                      <span className="text-masar-gold font-bold">{totalStampsCollected}</span>
+                      <span className="font-bold text-masar-red">{totalStampsCollected}</span>
                     </div>
                   </div>
                   
                   <div className="w-full">
-                    <h5 className="text-sm font-medium text-masar-blue mb-2">Emirates Visited</h5>
+                    <h5 className="text-sm font-medium mb-2 text-masar-blue">Emirates Visited</h5>
                     <div className="space-y-2">
                       {emitatesData.map(emirate => {
                       const stampsCollected = emirate.locations.filter(l => l.collected).length;
@@ -456,7 +456,7 @@ const PassportScreen = () => {
       
       {/* Scan Button */}
       <div className="fixed bottom-4 left-0 right-0 flex justify-center">
-        <Button onClick={handleScanClick} className="bg-masar-teal hover:bg-masar-teal/90 text-white px-8 py-4 rounded-full h-auto font-semibold">
+        <Button onClick={handleScanClick} className="text-white px-8 py-4 rounded-full h-auto font-semibold bg-masar-red">
           Scan for New Stamp
         </Button>
       </div>
