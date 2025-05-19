@@ -305,7 +305,7 @@ const PassportScreen = () => {
             {/* Inside Pages */}
             <div className="flip-card-back w-full h-full flex bg-white rounded-2xl shadow-lg overflow-hidden" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
               {/* Left Page - User Profile */}
-              <div className="w-1/2 h-full bg-masar-cream/50 border-r border-masar-gold/20 p-4 flex flex-col">
+              <div className="w-1/2 h-full border-r border-masar-gold/20 p-4 flex flex-col bg-teal-100">
                 <h3 className="text-center text-sm font-bold text-masar-blue uppercase tracking-wider mb-6 font-serif">Explorer Profile</h3>
                 
                 <div className="flex-1 flex flex-col items-center">
