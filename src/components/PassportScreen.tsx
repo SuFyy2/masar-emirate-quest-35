@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -21,9 +20,224 @@ interface Emirate {
   locations: Location[];
 }
 
-const emitatesData: Emirate[] = [
-  // ... keep existing code (emiratesData array definition)
-];
+// Helper function to get user-specific storage key
+const getUserStorageKey = (key: string): string => {
+  const currentUserEmail = localStorage.getItem('currentUserEmail');
+  if (!currentUserEmail) return key; // Fallback
+  return `${currentUserEmail}_${key}`;
+};
+
+const emitatesData: Emirate[] = [{
+  id: 'abu-dhabi',
+  name: 'Abu Dhabi',
+  image: '/lovable-uploads/099f147b-9369-493d-998c-178a3529981f.jpg',
+  locations: [{
+    id: 1,
+    name: 'Sheikh Zayed Mosque',
+    collected: false,
+    icon: '🕌'
+  }, {
+    id: 2,
+    name: 'Louvre Abu Dhabi',
+    collected: false,
+    icon: '🖼️'
+  }, {
+    id: 3,
+    name: 'Ferrari World',
+    collected: false,
+    icon: '🏎️'
+  }, {
+    id: 4,
+    name: 'Yas Island',
+    collected: false,
+    icon: '🏝️'
+  }, {
+    id: 5,
+    name: 'Qasr Al Watan',
+    collected: false,
+    icon: '🏛️'
+  }]
+}, {
+  id: 'dubai',
+  name: 'Dubai',
+  image: '/lovable-uploads/6968950d-668c-4473-916a-a9c71594902e.jpg',
+  locations: [{
+    id: 1,
+    name: 'Burj Khalifa',
+    collected: false,
+    icon: '🏢'
+  }, {
+    id: 2,
+    name: 'Dubai Mall',
+    collected: false,
+    icon: '🛍️'
+  }, {
+    id: 3,
+    name: 'Dubai Marina',
+    collected: false,
+    icon: '🛥️'
+  }, {
+    id: 4,
+    name: 'Dubai Creek',
+    collected: false,
+    icon: '🏞️'
+  }, {
+    id: 5,
+    name: 'The Palm Jumeirah',
+    collected: false,
+    icon: '🌴'
+  }]
+}, {
+  id: 'sharjah',
+  name: 'Sharjah',
+  image: '/lovable-uploads/e935a959-54c7-49a7-9914-4c5a9927294b.jpg',
+  locations: [{
+    id: 1,
+    name: 'Sharjah Arts Museum',
+    collected: false,
+    icon: '🎨'
+  }, {
+    id: 2,
+    name: 'Al Qasba',
+    collected: false,
+    icon: '🎡'
+  }, {
+    id: 3,
+    name: 'Sharjah Heritage Area',
+    collected: false,
+    icon: '🏺'
+  }, {
+    id: 4,
+    name: 'Khorfakkan Beach',
+    collected: false,
+    icon: '🏖️'
+  }, {
+    id: 5,
+    name: 'Mleiha Archaeological Center',
+    collected: false,
+    icon: '🪨'
+  }]
+}, {
+  id: 'ajman',
+  name: 'Ajman',
+  image: '/lovable-uploads/6010950f-4f4f-469b-b416-132398199f60.jpg',
+  locations: [{
+    id: 1,
+    name: 'Ajman Beach',
+    collected: false,
+    icon: '🌊'
+  }, {
+    id: 2,
+    name: 'Ajman Museum',
+    collected: false,
+    icon: '🏰'
+  }, {
+    id: 3,
+    name: 'Al Zorah Natural Reserve',
+    collected: false,
+    icon: '🐦'
+  }, {
+    id: 4,
+    name: 'City Centre Ajman',
+    collected: false,
+    icon: '🛍️'
+  }, {
+    id: 5,
+    name: 'Masfout Castle',
+    collected: false,
+    icon: '🏯'
+  }]
+}, {
+  id: 'umm-al-quwain',
+  name: 'Umm Al Quwain',
+  image: '/lovable-uploads/099f147b-9369-493d-998c-178a3529981f.jpg',
+  locations: [{
+    id: 1,
+    name: 'Umm Al Quwain Fort',
+    collected: false,
+    icon: '🛡️'
+  }, {
+    id: 2,
+    name: 'Dreamland Aqua Park',
+    collected: false,
+    icon: '🎢'
+  }, {
+    id: 3,
+    name: 'Al Sinniyah Island',
+    collected: false,
+    icon: '🏝️'
+  }, {
+    id: 4,
+    name: 'Umm Al Quwain Corniche',
+    collected: false,
+    icon: '🚶'
+  }, {
+    id: 5,
+    name: 'Umm Al Quwain National Museum',
+    collected: false,
+    icon: '🏛️'
+  }]
+}, {
+  id: 'fujairah',
+  name: 'Fujairah',
+  image: '/lovable-uploads/6968950d-668c-4473-916a-a9c71594902e.jpg',
+  locations: [{
+    id: 1,
+    name: 'Al Bidya Mosque',
+    collected: false,
+    icon: '🕌'
+  }, {
+    id: 2,
+    name: 'Fujairah Fort',
+    collected: false,
+    icon: '🏰'
+  }, {
+    id: 3,
+    name: 'Snoopy Island',
+    collected: false,
+    icon: '🏝️'
+  }, {
+    id: 4,
+    name: 'Al Aqah Beach',
+    collected: false,
+    icon: '🏖️'
+  }, {
+    id: 5,
+    name: 'Wadi Wurayah National Park',
+    collected: false,
+    icon: '🏞️'
+  }]
+}, {
+  id: 'ras-al-khaimah',
+  name: 'Ras Al Khaimah',
+  image: '/lovable-uploads/e935a959-54c7-49a7-9914-4c5a9927294b.jpg',
+  locations: [{
+    id: 1,
+    name: 'Dhayah Fort',
+    collected: false,
+    icon: '🛡️'
+  }, {
+    id: 2,
+    name: 'Jebel Jais',
+    collected: false,
+    icon: '⛰️'
+  }, {
+    id: 3,
+    name: 'National Museum of Ras Al Khaimah',
+    collected: false,
+    icon: '🏛️'
+  }, {
+    id: 4,
+    name: 'Al Marjan Island',
+    collected: false,
+    icon: '🏝️'
+  }, {
+    id: 5,
+    name: 'Khatt Springs',
+    collected: false,
+    icon: '⛲'
+  }]
+}];
 
 const PassportScreen = () => {
   const [isFlipped, setIsFlipped] = useState(false);
@@ -44,17 +258,17 @@ const PassportScreen = () => {
     setUserName(storedUserName);
     
     // Load or create join date
-    let joinDate = localStorage.getItem('userJoinDate');
+    let joinDate = localStorage.getItem(getUserStorageKey('userJoinDate'));
     if (!joinDate) {
       // If no join date, set it to current date
       const now = new Date();
       joinDate = `${now.toLocaleString('default', { month: 'long' })} ${now.getFullYear()}`;
-      localStorage.setItem('userJoinDate', joinDate);
+      localStorage.setItem(getUserStorageKey('userJoinDate'), joinDate);
     }
     setUserJoinDate(joinDate);
     
     // Load collected stamps
-    const storedStamps = localStorage.getItem('collectedStamps');
+    const storedStamps = localStorage.getItem(getUserStorageKey('collectedStamps'));
     if (storedStamps) {
       setCollectedStampsData(JSON.parse(storedStamps));
     }
@@ -424,4 +638,3 @@ const PassportScreen = () => {
 };
 
 export default PassportScreen;
-

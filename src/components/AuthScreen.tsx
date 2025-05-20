@@ -5,6 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from '@/hooks/use-toast';
 
+// Helper function to get user-specific storage key
+const getUserStorageKey = (key: string, userEmail: string): string => {
+  return `${userEmail}_${key}`;
+};
+
 const AuthScreen = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -64,17 +69,24 @@ const AuthScreen = () => {
       }
       
       // Register the new user
+      const now = new Date();
+      const registeredAt = now.toISOString();
+      const joinDate = `${now.toLocaleString('default', { month: 'long' })} ${now.getFullYear()}`;
+      
       registeredUsers.push({
         email,
         name,
         password, // Note: In a real app, never store passwords in plaintext
-        registeredAt: new Date().toISOString()
+        registeredAt
       });
       
       localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
       localStorage.setItem('isAuthenticated', 'true');
       localStorage.setItem('currentUserEmail', email);
       localStorage.setItem('userName', name);
+      
+      // Initialize user join date
+      localStorage.setItem(getUserStorageKey('userJoinDate', email), joinDate);
       
       toast({
         title: "Account created!",

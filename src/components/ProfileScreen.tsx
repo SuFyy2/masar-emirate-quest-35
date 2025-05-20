@@ -55,6 +55,13 @@ const defaultUserProfile = {
   hometown: ''
 };
 
+// Helper function to get user-specific storage key
+const getUserStorageKey = (key: string): string => {
+  const currentUserEmail = localStorage.getItem('currentUserEmail');
+  if (!currentUserEmail) return key; // Fallback
+  return `${currentUserEmail}_${key}`;
+};
+
 const ProfileScreen = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -81,9 +88,9 @@ const ProfileScreen = () => {
         setIsNewOrDemoUser(true);
       } else {
         // Check if new user (first time viewing profile)
-        const hasViewedProfileBefore = localStorage.getItem('hasViewedProfileBefore');
+        const hasViewedProfileBefore = localStorage.getItem(getUserStorageKey('hasViewedProfileBefore'));
         if (!hasViewedProfileBefore) {
-          localStorage.setItem('hasViewedProfileBefore', 'true');
+          localStorage.setItem(getUserStorageKey('hasViewedProfileBefore'), 'true');
           setIsNewOrDemoUser(true);
         }
       }
@@ -91,7 +98,7 @@ const ProfileScreen = () => {
     
     // Load saved profile data if it exists
     if (!isDemoUser) {
-      const savedProfile = localStorage.getItem('userProfile');
+      const savedProfile = localStorage.getItem(getUserStorageKey('userProfile'));
       if (savedProfile) {
         setUserProfile(JSON.parse(savedProfile));
       } else {
@@ -104,7 +111,7 @@ const ProfileScreen = () => {
     }
     
     // Load stamps data from localStorage
-    const storedStamps = localStorage.getItem('collectedStamps');
+    const storedStamps = localStorage.getItem(getUserStorageKey('collectedStamps'));
     if (storedStamps && !isDemoUser && !isNewOrDemoUser) {
       setStampsCollected(JSON.parse(storedStamps));
     }
@@ -148,7 +155,7 @@ const ProfileScreen = () => {
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('userName');
     localStorage.removeItem('hasViewedHomeScreen');
-    localStorage.removeItem('hasViewedProfileBefore');
+    localStorage.removeItem(getUserStorageKey('hasViewedProfileBefore'));
     navigate('/login');
   };
   
@@ -179,8 +186,8 @@ const ProfileScreen = () => {
       return;
     }
     
-    // Save to localStorage
-    localStorage.setItem('userProfile', JSON.stringify(userProfile));
+    // Save to localStorage with user-specific key
+    localStorage.setItem(getUserStorageKey('userProfile'), JSON.stringify(userProfile));
     setIsEditing(false);
     
     toast({

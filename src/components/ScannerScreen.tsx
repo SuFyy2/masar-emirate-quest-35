@@ -13,6 +13,13 @@ const demoStampData = {
   timestamp: new Date().toISOString()
 };
 
+// Helper function to get user-specific storage key
+const getUserStorageKey = (key: string): string => {
+  const currentUserEmail = localStorage.getItem('currentUserEmail');
+  if (!currentUserEmail) return key; // Fallback
+  return `${currentUserEmail}_${key}`;
+};
+
 const ScannerScreen = () => {
   const [scanning, setScanning] = useState(true);
   const navigate = useNavigate();
@@ -44,14 +51,14 @@ const ScannerScreen = () => {
     
     try {
       // Set user join date if not already set
-      if (!localStorage.getItem('userJoinDate')) {
+      if (!localStorage.getItem(getUserStorageKey('userJoinDate'))) {
         const now = new Date();
         const joinDate = `${now.toLocaleString('default', { month: 'long' })} ${now.getFullYear()}`;
-        localStorage.setItem('userJoinDate', joinDate);
+        localStorage.setItem(getUserStorageKey('userJoinDate'), joinDate);
       }
       
       // Get existing stamps from localStorage
-      const existingStampsString = localStorage.getItem('collectedStamps');
+      const existingStampsString = localStorage.getItem(getUserStorageKey('collectedStamps'));
       let collectedStamps = {};
       
       if (existingStampsString) {
@@ -75,8 +82,8 @@ const ScannerScreen = () => {
           collectedAt: stampData.timestamp
         });
         
-        // Save to localStorage
-        localStorage.setItem('collectedStamps', JSON.stringify(collectedStamps));
+        // Save to localStorage with user-specific key
+        localStorage.setItem(getUserStorageKey('collectedStamps'), JSON.stringify(collectedStamps));
       }
     } catch (error) {
       console.error("Error saving stamp data:", error);

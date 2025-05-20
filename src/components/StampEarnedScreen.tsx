@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -13,6 +12,13 @@ const stampData = {
   emirateName: 'Dubai',
   description: 'Home to over 1,200 retail outlets and 200 food & beverage outlets, Dubai Mall is one of the world\'s largest shopping destinations.',
   icon: '🛍️'
+};
+
+// Helper function to get user-specific storage key
+const getUserStorageKey = (key: string): string => {
+  const currentUserEmail = localStorage.getItem('currentUserEmail');
+  if (!currentUserEmail) return key; // Fallback
+  return `${currentUserEmail}_${key}`;
 };
 
 // Function to create confetti elements
@@ -66,7 +72,7 @@ const StampEarnedScreen = () => {
     
     try {
       // Get existing stamps data or initialize
-      const existingStampsString = localStorage.getItem('collectedStamps');
+      const existingStampsString = localStorage.getItem(getUserStorageKey('collectedStamps'));
       let collectedStamps = {};
       
       if (existingStampsString) {
@@ -91,8 +97,8 @@ const StampEarnedScreen = () => {
           collectedAt: new Date().toISOString()
         });
         
-        // Save to localStorage
-        localStorage.setItem('collectedStamps', JSON.stringify(collectedStamps));
+        // Save to localStorage with user-specific key
+        localStorage.setItem(getUserStorageKey('collectedStamps'), JSON.stringify(collectedStamps));
       }
     } catch (error) {
       console.error("Error saving stamp data:", error);
