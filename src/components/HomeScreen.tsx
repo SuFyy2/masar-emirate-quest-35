@@ -7,6 +7,13 @@ import { Map, Compass, User } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Progress } from "@/components/ui/progress";
 
+// Helper function to get user-specific storage key
+const getUserStorageKey = (key: string): string => {
+  const currentUserEmail = localStorage.getItem('currentUserEmail');
+  if (!currentUserEmail) return key; // Fallback
+  return `${currentUserEmail}_${key}`;
+};
+
 const emitatesData = [
   {
     id: 'abu-dhabi',
@@ -85,7 +92,7 @@ const HomeScreen = () => {
     
     // Load stamps data from localStorage for non-demo users
     if (!isDemoUser) {
-      const storedStamps = localStorage.getItem('collectedStamps');
+      const storedStamps = localStorage.getItem(getUserStorageKey('collectedStamps'));
       
       if (storedStamps) {
         const stampsData = JSON.parse(storedStamps);
