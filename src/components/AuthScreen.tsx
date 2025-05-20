@@ -11,132 +11,114 @@ const AuthScreen = () => {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const navigate = useNavigate();
-  
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
+    
     // Simple validation
     if (!email || !password || (!isLogin && !name)) {
       toast({
         title: "Please fill in all fields",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
-
-    if (isLogin) {
-      // Check if this user has signed up before
-      const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-      const foundUser = registeredUsers.find((user: any) => user.email === email);
-      
-      if (!foundUser) {
-        toast({
-          title: "Account not found",
-          description: "Please sign up first",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      // User exists, proceed with login and set the userName from the stored user data
-      localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('currentUserEmail', email);
-      localStorage.setItem('userName', foundUser.name); // Set the username from the found user
-      
-      toast({
-        title: "Login successful!",
-        description: "Welcome back to Masar"
-      });
-      
-      navigate('/home');
-    } else {
-      // This is a sign up
-      const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-      const userExists = registeredUsers.some((user: any) => user.email === email);
-      
-      if (userExists) {
-        toast({
-          title: "Email already registered",
-          description: "Please log in instead",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      // Register the new user
-      registeredUsers.push({
-        email,
-        name,
-        password, // Note: In a real app, never store passwords in plaintext
-        registeredAt: new Date().toISOString()
-      });
-      
-      localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
-      localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('currentUserEmail', email);
+    
+    // For demo purposes, we'll just simulate authentication
+    localStorage.setItem('isAuthenticated', 'true');
+    
+    // If it's a new signup, store the user's name
+    if (!isLogin) {
       localStorage.setItem('userName', name);
-      
-      toast({
-        title: "Account created!",
-        description: "Welcome to Masar"
-      });
-      
-      navigate('/home');
     }
+    
+    toast({
+      title: isLogin ? "Login successful!" : "Account created!",
+      description: "Welcome to Masar",
+    });
+    
+    // Navigate to home screen
+    navigate('/home');
   };
 
-  return <div className="min-h-screen flex flex-col bg-masar-cream">
+  return (
+    <div className="min-h-screen flex flex-col bg-masar-cream">
       <div className="flex-1 flex flex-col justify-center items-center px-8 pt-8">
         <div className="mb-8 animate-fade-in">
-          <img alt="Masar Logo" className="w-40 h-auto" src="/lovable-uploads/e30f278e-11ed-4334-a4ec-e8f6bc9f837e.png" />
+          <img 
+            src="/lovable-uploads/21b85797-a307-41e9-bf45-70a8191c7f5c.png" 
+            alt="Masar Logo" 
+            className="w-40 h-auto"
+          />
         </div>
         
         <div className="w-full max-w-md">
-          <h1 className="text-2xl font-bold mb-6 text-center text-masar-blue">
+          <h1 className="text-2xl font-bold text-masar-teal mb-6 text-center">
             {isLogin ? 'Welcome Back!' : 'Create Account'}
           </h1>
           
           <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && <div>
-                <Input type="text" placeholder="Your Name" value={name} onChange={e => setName(e.target.value)} className="bg-white border-masar-mint focus:border-masar-teal rounded-xl py-6" />
-              </div>}
+            {!isLogin && (
+              <div>
+                <Input
+                  type="text"
+                  placeholder="Your Name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="bg-white border-masar-mint focus:border-masar-teal rounded-xl py-6"
+                />
+              </div>
+            )}
             
             <div>
-              <Input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} className="bg-white border-masar-mint focus:border-masar-teal rounded-xl py-6" />
+              <Input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="bg-white border-masar-mint focus:border-masar-teal rounded-xl py-6"
+              />
             </div>
             
             <div>
-              <Input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} className="bg-white border-masar-mint focus:border-masar-teal rounded-xl py-6" />
+              <Input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="bg-white border-masar-mint focus:border-masar-teal rounded-xl py-6"
+              />
             </div>
             
-            <Button type="submit" className="w-full bg-masar-teal hover:bg-masar-teal/90 text-white rounded-xl py-6 h-auto font-medium text-lg">
+            <Button
+              type="submit"
+              className="w-full bg-masar-teal hover:bg-masar-teal/90 text-white rounded-xl py-6 h-auto font-medium text-lg"
+            >
               {isLogin ? 'Log In' : 'Sign Up'}
             </Button>
           </form>
           
           <div className="mt-6 text-center">
-            <Button variant="link" onClick={() => setIsLogin(!isLogin)} className="text-masar-teal hover:text-masar-teal/80">
+            <Button
+              variant="link"
+              onClick={() => setIsLogin(!isLogin)}
+              className="text-masar-teal hover:text-masar-teal/80"
+            >
               {isLogin ? "Don't have an account? Sign up" : "Already have an account? Log in"}
             </Button>
           </div>
 
           <div className="mt-4 text-center">
-            <Button variant="link" onClick={() => {
-            // For demo purposes, skip login
-            localStorage.setItem('isAuthenticated', 'true');
-            localStorage.setItem('userName', 'Demo User');
-            
-            // Reset progress tracking for demo user
-            localStorage.removeItem('hasViewedHomeScreen');
-            localStorage.removeItem('hasViewedProfileBefore');
-            
-            toast({
-              title: "Welcome, Demo User!",
-              description: "You're using a demo account with no progress"
-            });
-            
-            navigate('/home');
-          }} className="text-masar-gold hover:text-masar-gold/80">
+            <Button
+              variant="link"
+              onClick={() => {
+                // For demo purposes, skip login
+                localStorage.setItem('isAuthenticated', 'true');
+                localStorage.setItem('userName', 'Demo User');
+                navigate('/home');
+              }}
+              className="text-masar-gold hover:text-masar-gold/80"
+            >
               Continue as Demo User
             </Button>
           </div>
@@ -151,6 +133,8 @@ const AuthScreen = () => {
           </p>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default AuthScreen;
