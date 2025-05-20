@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -63,18 +62,23 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Masar custom colors
+				// Masar custom colors - updated with new palette
 				masar: {
-					teal: '#0D9B8A',
-					gold: '#E1B14C',
-					cream: '#F9F5E7',
-					mint: '#A8E0D1',
+					blue: '#004369',    // Primary deep blue
+					teal: '#00A8A8',    // Accent teal
+					gold: '#D9A441',    // Secondary gold
+					red: '#DB1F48',     // Alert/action red
+					cream: '#FDF8F3',   // Background cream
 				}
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
+			},
+			fontFamily: {
+				'serif': ['"DM Serif Display"', 'serif'],
+				'sans': ['Poppins', 'sans-serif'],
 			},
 			keyframes: {
 				'accordion-down': {

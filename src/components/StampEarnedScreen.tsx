@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Camera } from 'lucide-react';
+import { Camera, ArrowLeft } from 'lucide-react';
 
 // Function to create confetti elements
 const createConfetti = (container: HTMLDivElement) => {
@@ -112,7 +112,7 @@ const StampEarnedScreen = () => {
         </>
       ) : (
         <>
-          <div className="bg-masar-teal text-white p-4">
+          <div className="bg-masar-gold text-white p-4">
             <div className="flex items-center">
               <Button 
                 variant="ghost" 

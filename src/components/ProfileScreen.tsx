@@ -1,45 +1,60 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, User, Map, Compass, Star } from 'lucide-react';
-
-const emitatesData = [
-  { id: 'abu-dhabi', name: 'Abu Dhabi', collected: 2, total: 5 },
-  { id: 'dubai', name: 'Dubai', collected: 3, total: 5 },
-  { id: 'sharjah', name: 'Sharjah', collected: 0, total: 5 },
-  { id: 'ajman', name: 'Ajman', collected: 1, total: 5 },
-  { id: 'umm-al-quwain', name: 'Umm Al Quwain', collected: 0, total: 5 },
-  { id: 'fujairah', name: 'Fujairah', collected: 0, total: 5 },
-  { id: 'ras-al-khaimah', name: 'Ras Al Khaimah', collected: 0, total: 5 }
-];
-
+const emitatesData = [{
+  id: 'abu-dhabi',
+  name: 'Abu Dhabi',
+  collected: 2,
+  total: 5
+}, {
+  id: 'dubai',
+  name: 'Dubai',
+  collected: 3,
+  total: 5
+}, {
+  id: 'sharjah',
+  name: 'Sharjah',
+  collected: 0,
+  total: 5
+}, {
+  id: 'ajman',
+  name: 'Ajman',
+  collected: 1,
+  total: 5
+}, {
+  id: 'umm-al-quwain',
+  name: 'Umm Al Quwain',
+  collected: 0,
+  total: 5
+}, {
+  id: 'fujairah',
+  name: 'Fujairah',
+  collected: 0,
+  total: 5
+}, {
+  id: 'ras-al-khaimah',
+  name: 'Ras Al Khaimah',
+  collected: 0,
+  total: 5
+}];
 const ProfileScreen = () => {
   const navigate = useNavigate();
-  
   const totalCollected = emitatesData.reduce((sum, emirate) => sum + emirate.collected, 0);
   const totalStamps = emitatesData.reduce((sum, emirate) => sum + emirate.total, 0);
-  const completionPercentage = Math.round((totalCollected / totalStamps) * 100);
-  
+  const completionPercentage = Math.round(totalCollected / totalStamps * 100);
   const userName = localStorage.getItem('userName') || 'Explorer';
-  
   const handleLogout = () => {
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('userName');
     navigate('/login');
   };
-
-  return (
-    <div className="min-h-screen bg-masar-cream pb-20">
+  return <div className="min-h-screen bg-masar-cream pb-20">
       {/* Header */}
-      <div className="bg-masar-teal text-white p-4">
+      <div className="text-white p-4 bg-masar-blue">
         <div className="flex items-center">
-          <Button 
-            variant="ghost" 
-            className="text-white p-2 h-auto" 
-            onClick={() => navigate(-1)}
-          >
+          <Button variant="ghost" className="text-white p-2 h-auto" onClick={() => navigate(-1)}>
             <ArrowLeft className="w-6 h-6" />
           </Button>
           <h1 className="text-xl font-bold ml-2">My Profile</h1>
@@ -53,8 +68,8 @@ const ProfileScreen = () => {
             <User className="w-10 h-10 text-masar-teal" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-masar-teal">{userName}</h2>
-            <p className="text-masar-teal/70">
+            <h2 className="text-xl font-bold text-masar-gold">{userName}</h2>
+            <p className="text-masar-red">
               {completionPercentage}% Explorer
             </p>
           </div>
@@ -82,32 +97,25 @@ const ProfileScreen = () => {
         </div>
         
         {/* Progress By Emirate */}
-        <h3 className="text-lg font-bold text-masar-teal mb-3">Progress by Emirate</h3>
+        <h3 className="text-lg font-bold mb-3 text-masar-gold">Progress by Emirate</h3>
         <div className="space-y-4 mb-8">
-          {emitatesData.map((emirate) => (
-            <div key={emirate.id} className="bg-white rounded-lg p-4 shadow-sm">
+          {emitatesData.map(emirate => <div key={emirate.id} className="rounded-lg p-4 shadow-sm bg-masar-cream">
               <div className="flex justify-between items-center mb-2">
-                <h4 className="font-medium text-masar-teal">{emirate.name}</h4>
-                <span className="text-sm text-masar-teal/70">
+                <h4 className="font-medium text-masar-blue">{emirate.name}</h4>
+                <span className="text-sm text-masar-gold">
                   {emirate.collected}/{emirate.total} stamps
                 </span>
               </div>
               <div className="h-2 bg-gray-100 rounded-full">
-                <div 
-                  className="h-2 bg-masar-teal rounded-full" 
-                  style={{ width: `${(emirate.collected / emirate.total) * 100}%` }} 
-                />
+                <div style={{
+              width: `${emirate.collected / emirate.total * 100}%`
+            }} className="h-2 rounded-full bg-masar-teal" />
               </div>
-            </div>
-          ))}
+            </div>)}
         </div>
         
         {/* Settings & Logout */}
-        <Button 
-          variant="outline"
-          onClick={handleLogout}
-          className="w-full border-masar-teal text-masar-teal"
-        >
+        <Button variant="outline" onClick={handleLogout} className="w-full border-masar-teal text-masar-teal">
           Log Out
         </Button>
       </div>
@@ -115,35 +123,22 @@ const ProfileScreen = () => {
       {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
         <div className="flex justify-around">
-          <Button 
-            variant="ghost" 
-            className="flex flex-col items-center text-gray-400"
-            onClick={() => navigate('/home')}
-          >
+          <Button variant="ghost" className="flex flex-col items-center text-gray-400" onClick={() => navigate('/home')}>
             <Map className="w-6 h-6" />
             <span className="text-xs mt-1">Explore</span>
           </Button>
-          <Button 
-            variant="ghost" 
-            className="flex flex-col items-center text-gray-400"
-            onClick={() => navigate('/scan')}
-          >
+          <Button variant="ghost" className="flex flex-col items-center text-gray-400" onClick={() => navigate('/scan')}>
             <div className="bg-gray-200 rounded-full p-3 -mt-8 border-4 border-white">
               <Compass className="w-6 h-6 text-gray-500" />
             </div>
             <span className="text-xs mt-1">Scan</span>
           </Button>
-          <Button 
-            variant="ghost" 
-            className="flex flex-col items-center text-masar-teal"
-          >
+          <Button variant="ghost" className="flex flex-col items-center text-masar-teal">
             <User className="w-6 h-6" />
             <span className="text-xs mt-1">Profile</span>
           </Button>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default ProfileScreen;

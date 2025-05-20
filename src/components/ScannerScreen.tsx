@@ -95,13 +95,15 @@ const ScannerScreen = () => {
         </Button>
       </div>
       
-      <style jsx>{`
-        @keyframes scanAnimation {
-          0% { transform: translateY(0); }
-          50% { transform: translateY(256px); }
-          100% { transform: translateY(0); }
-        }
-      `}</style>
+      <style>
+        {`
+          @keyframes scanAnimation {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(256px); }
+            100% { transform: translateY(0); }
+          }
+        `}
+      </style>
     </div>
   );
 };
