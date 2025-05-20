@@ -8,8 +8,8 @@ import { useToast } from '@/hooks/use-toast';
 // Simulated data for demo purposes - normally would come from the QR code
 const demoStampData = {
   emirateId: 'dubai',
-  locationId: 4, // Dubai Creek
-  name: 'Dubai Creek',
+  locationId: 2, // Updated to Dubai Mall to match StampEarnedScreen.tsx
+  name: 'Dubai Mall',
   timestamp: new Date().toISOString()
 };
 
