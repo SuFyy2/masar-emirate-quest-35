@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { Progress } from "@/components/ui/progress";
 
 const emitatesData = [{
   id: 'abu-dhabi',
@@ -66,6 +66,9 @@ const ProfileScreen = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [userProfile, setUserProfile] = useState(defaultUserProfile);
   
+  // Get stamps collected from localStorage or default to 0 for new/demo users
+  const [stampsCollected, setStampsCollected] = useState({});
+  
   useEffect(() => {
     // Get the current username from localStorage whenever component mounts
     const storedUserName = localStorage.getItem('userName');
@@ -99,18 +102,47 @@ const ProfileScreen = () => {
         });
       }
     }
+    
+    // Load stamps data from localStorage
+    const storedStamps = localStorage.getItem('collectedStamps');
+    if (storedStamps && !isDemoUser && !isNewOrDemoUser) {
+      setStampsCollected(JSON.parse(storedStamps));
+    }
   }, [isDemoUser]);
 
+  // Calculate collected stamps based on the stored data or use 0 for new/demo users
+  const calculateEmiratesProgress = () => {
+    if (isNewOrDemoUser || isDemoUser) {
+      return emitatesData.map(emirate => ({
+        ...emirate,
+        collected: 0
+      }));
+    }
+    
+    // If we have stored stamps data, use it to calculate progress
+    if (Object.keys(stampsCollected).length > 0) {
+      return emitatesData.map(emirate => {
+        const emirateStamps = stampsCollected[emirate.id] || [];
+        return {
+          ...emirate,
+          collected: emirateStamps.length
+        };
+      });
+    }
+    
+    // Otherwise use the default data
+    return emitatesData;
+  };
+  
+  const emiratesWithProgress = calculateEmiratesProgress();
+  
   // For new/demo users, show 0 collected stamps
-  let totalCollected = emitatesData.reduce((sum, emirate) => sum + emirate.collected, 0);
+  const totalCollected = isNewOrDemoUser || isDemoUser ? 0 : 
+    emiratesWithProgress.reduce((sum, emirate) => sum + emirate.collected, 0);
   const totalStamps = emitatesData.reduce((sum, emirate) => sum + emirate.total, 0);
   
-  // Reset progress for new and demo users
-  if (isNewOrDemoUser) {
-    totalCollected = 0;
-  }
-  
-  const completionPercentage = isNewOrDemoUser ? 0 : Math.round(totalCollected / totalStamps * 100);
+  const completionPercentage = isNewOrDemoUser || isDemoUser ? 0 : 
+    Math.round((totalCollected / totalStamps) * 100);
 
   const handleLogout = () => {
     localStorage.removeItem('isAuthenticated');
@@ -284,7 +316,7 @@ const ProfileScreen = () => {
               <Map className="w-5 h-5 text-masar-teal mr-2" />
               <h3 className="font-medium text-masar-teal">Total Stamps</h3>
             </div>
-            <p className="text-2xl font-bold text-masar-teal">{isNewOrDemoUser ? 0 : totalCollected}/{totalStamps}</p>
+            <p className="text-2xl font-bold text-masar-teal">{totalCollected}/{totalStamps}</p>
           </Card>
           
           <Card className="p-4 bg-masar-gold/20">
@@ -293,7 +325,7 @@ const ProfileScreen = () => {
               <h3 className="font-medium text-masar-teal">Emirates</h3>
             </div>
             <p className="text-2xl font-bold text-masar-teal">
-              {isNewOrDemoUser ? 0 : emitatesData.filter(e => e.collected > 0).length}/{emitatesData.length}
+              {isNewOrDemoUser || isDemoUser ? 0 : emiratesWithProgress.filter(e => e.collected > 0).length}/{emitatesData.length}
             </p>
           </Card>
         </div>
@@ -301,18 +333,14 @@ const ProfileScreen = () => {
         {/* Progress By Emirate */}
         <h3 className="text-lg font-bold mb-3 text-masar-gold">Progress by Emirate</h3>
         <div className="space-y-4 mb-8">
-          {emitatesData.map(emirate => <div key={emirate.id} className="rounded-lg p-4 shadow-sm bg-masar-cream">
+          {emiratesWithProgress.map(emirate => <div key={emirate.id} className="rounded-lg p-4 shadow-sm bg-masar-cream">
               <div className="flex justify-between items-center mb-2">
                 <h4 className="font-medium text-masar-blue">{emirate.name}</h4>
                 <span className="text-sm text-masar-gold">
-                  {isNewOrDemoUser ? 0 : emirate.collected}/{emirate.total} stamps
+                  {emirate.collected}/{emirate.total} stamps
                 </span>
               </div>
-              <div className="h-2 bg-gray-100 rounded-full">
-                <div style={{
-              width: `${isNewOrDemoUser ? 0 : (emirate.collected / emirate.total * 100)}%`
-            }} className="h-2 rounded-full bg-masar-teal" />
-              </div>
+              <Progress value={emirate.collected / emirate.total * 100} className="h-2" />
             </div>)}
         </div>
         

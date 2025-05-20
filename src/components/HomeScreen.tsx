@@ -1,9 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Map, Compass, User } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { Progress } from "@/components/ui/progress";
 
 const emitatesData = [
   {
@@ -11,13 +13,13 @@ const emitatesData = [
     name: 'Abu Dhabi',
     image: 'https://images.unsplash.com/photo-1466442929976-97f336a657be?auto=format&fit=crop&w=800&q=80',
     stampCount: 5,
-    collectedStamps: 2
+    collectedStamps: 0
   }, {
     id: 'dubai',
     name: 'Dubai',
     image: 'https://images.unsplash.com/photo-1469041797191-50ace28483c3?auto=format&fit=crop&w=800&q=80',
     stampCount: 5,
-    collectedStamps: 3
+    collectedStamps: 0
   }, {
     id: 'sharjah',
     name: 'Sharjah',
@@ -29,7 +31,7 @@ const emitatesData = [
     name: 'Ajman',
     image: 'https://images.unsplash.com/photo-1482938289607-e9573fc25ebb?auto=format&fit=crop&w=800&q=80',
     stampCount: 5,
-    collectedStamps: 1
+    collectedStamps: 0
   }, {
     id: 'umm-al-quwain',
     name: 'Umm Al Quwain',
@@ -62,10 +64,12 @@ const HomeScreen = () => {
     isDemoUser: false,
   });
   
+  // State to store the calculated emirate data with actual collected stamps
+  const [calculatedEmirateData, setCalculatedEmirateData] = useState(emitatesData);
+  
   useEffect(() => {
     // Check if user is demo user or new user
     const userName = localStorage.getItem('userName');
-    const currentUserEmail = localStorage.getItem('currentUserEmail');
     const isNewUser = !localStorage.getItem('hasViewedHomeScreen');
     const isDemoUser = userName === 'Demo User';
     
@@ -79,21 +83,42 @@ const HomeScreen = () => {
       isDemoUser
     });
     
+    // Load stamps data from localStorage for non-demo users
+    if (!isDemoUser) {
+      const storedStamps = localStorage.getItem('collectedStamps');
+      
+      if (storedStamps) {
+        const stampsData = JSON.parse(storedStamps);
+        
+        // Calculate collected stamps for each emirate
+        const updatedEmirateData = emitatesData.map(emirate => {
+          const emirateStamps = stampsData[emirate.id] || [];
+          return {
+            ...emirate,
+            collectedStamps: emirateStamps.length
+          };
+        });
+        
+        setCalculatedEmirateData(updatedEmirateData);
+      }
+    }
+    
     // Rotate tips every 6 seconds
     const tipInterval = setInterval(() => {
       setCurrentTip(prev => (prev + 1) % tips.length);
     }, 6000);
+    
     return () => clearInterval(tipInterval);
   }, []);
   
-  // Calculate total stamps (show 0% for new users and demo users)
-  let totalCollectedStamps = emitatesData.reduce((sum, emirate) => sum + emirate.collectedStamps, 0);
-  const totalStamps = emitatesData.reduce((sum, emirate) => sum + emirate.stampCount, 0);
+  // Calculate total stamps based on the actual collected stamps data
+  // Show 0% for new users and demo users
+  const totalCollectedStamps = userData.isNewUser || userData.isDemoUser ? 0 : 
+    calculatedEmirateData.reduce((sum, emirate) => sum + emirate.collectedStamps, 0);
+  const totalStamps = calculatedEmirateData.reduce((sum, emirate) => sum + emirate.stampCount, 0);
   
-  // Reset progress to 0 for new and demo users
-  if (userData.isNewUser || userData.isDemoUser) {
-    totalCollectedStamps = 0;
-  }
+  const completionPercentage = userData.isNewUser || userData.isDemoUser ? 0 : 
+    Math.round((totalCollectedStamps / totalStamps) * 100);
   
   const handlePassportClick = () => {
     navigate('/passport');
@@ -147,14 +172,10 @@ const HomeScreen = () => {
               <div className="flex items-center justify-between">
                 <span className="text-masar-blue font-medium">Progress</span>
                 <span className="text-masar-blue font-semibold">
-                  {userData.isNewUser || userData.isDemoUser ? 0 : Math.round(totalCollectedStamps / totalStamps * 100)}%
+                  {completionPercentage}%
                 </span>
               </div>
-              <div className="h-2 bg-gray-200 rounded-full w-full mt-2">
-                <div className="h-2 bg-masar-teal rounded-full" style={{
-                width: `${userData.isNewUser || userData.isDemoUser ? 0 : (totalCollectedStamps / totalStamps * 100)}%`
-              }} />
-              </div>
+              <Progress value={completionPercentage} className="h-2 mt-2" />
             </div>
             <Button className="bg-masar-teal hover:bg-masar-teal/90 text-white ml-4 font-semibold" onClick={handlePassportClick}>
               View
@@ -168,7 +189,7 @@ const HomeScreen = () => {
         <h2 className="text-xl font-serif font-bold text-masar-blue mb-3">Explore Emirates</h2>
         <div className="overflow-x-auto pb-4">
           <div className="flex space-x-4">
-            {emitatesData.map((emirate, index) => <Card key={emirate.id} className="flex-shrink-0 w-64 overflow-hidden" onClick={() => setActiveEmirateIndex(index)}>
+            {calculatedEmirateData.map((emirate, index) => <Card key={emirate.id} className="flex-shrink-0 w-64 overflow-hidden" onClick={() => setActiveEmirateIndex(index)}>
                 <div className="relative h-36">
                   <img src={emirate.image} alt={emirate.name} className="absolute inset-0 w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-3">
@@ -196,13 +217,6 @@ const HomeScreen = () => {
               </Card>)}
           </div>
         </div>
-      </div>
-      
-      {/* Scan Button */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex justify-center">
-        <Button onClick={handleScanClick} className="px-8 py-6 rounded-full h-auto text-lg font-semibold text-masar-cream bg-masar-red">
-          Scan for New Stamp
-        </Button>
       </div>
       
       {/* Bottom Navigation */}

@@ -3,6 +3,17 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Camera, ArrowLeft } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast";
+
+// Simulated stamp data - normally this would come from the scanned QR code
+const stampData = {
+  emirateId: 'dubai',
+  locationId: 2,
+  name: 'Dubai Mall',
+  emirateName: 'Dubai',
+  description: 'Home to over 1,200 retail outlets and 200 food & beverage outlets, Dubai Mall is one of the world\'s largest shopping destinations.',
+  icon: '🛍️'
+};
 
 // Function to create confetti elements
 const createConfetti = (container: HTMLDivElement) => {
@@ -24,6 +35,7 @@ const StampEarnedScreen = () => {
   const [showAddMemory, setShowAddMemory] = useState(false);
   const [note, setNote] = useState('');
   const navigate = useNavigate();
+  const { toast } = useToast();
   
   // Reference for confetti container
   const confettiContainerRef = React.useRef<HTMLDivElement>(null);
@@ -34,6 +46,9 @@ const StampEarnedScreen = () => {
       createConfetti(confettiContainerRef.current);
     }
     
+    // Save the stamp data when stamp is earned
+    saveStampData();
+    
     // Clean up confetti when component unmounts
     return () => {
       if (confettiContainerRef.current) {
@@ -41,6 +56,48 @@ const StampEarnedScreen = () => {
       }
     };
   }, []);
+  
+  // Function to save the stamp data to localStorage
+  const saveStampData = () => {
+    // Don't save data for demo users
+    const userName = localStorage.getItem('userName');
+    const isDemoUser = userName === 'Demo User';
+    if (isDemoUser) return;
+    
+    try {
+      // Get existing stamps data or initialize
+      const existingStampsString = localStorage.getItem('collectedStamps');
+      let collectedStamps = {};
+      
+      if (existingStampsString) {
+        collectedStamps = JSON.parse(existingStampsString);
+      }
+      
+      // Initialize emirate array if needed
+      if (!collectedStamps[stampData.emirateId]) {
+        collectedStamps[stampData.emirateId] = [];
+      }
+      
+      // Check if this stamp is already collected
+      const alreadyCollected = collectedStamps[stampData.emirateId].some(
+        stamp => stamp.locationId === stampData.locationId
+      );
+      
+      if (!alreadyCollected) {
+        // Add the stamp to the collection
+        collectedStamps[stampData.emirateId].push({
+          locationId: stampData.locationId,
+          name: stampData.name,
+          collectedAt: new Date().toISOString()
+        });
+        
+        // Save to localStorage
+        localStorage.setItem('collectedStamps', JSON.stringify(collectedStamps));
+      }
+    } catch (error) {
+      console.error("Error saving stamp data:", error);
+    }
+  };
   
   const handleViewPassport = () => {
     navigate('/passport');
@@ -52,6 +109,12 @@ const StampEarnedScreen = () => {
   
   const handleSaveMemory = () => {
     // In a real app, we would save the memory to the database
+    // For now, just show a success toast
+    toast({
+      title: "Memory Saved",
+      description: "Your memory has been added to your collection"
+    });
+    
     setShowAddMemory(false);
     navigate('/passport');
   };
@@ -73,22 +136,22 @@ const StampEarnedScreen = () => {
             </h1>
             
             <p className="text-center text-masar-teal/80 mb-8 animate-fade-in">
-              Congratulations on visiting the Dubai Mall! This stamp has been added to your digital passport.
+              Congratulations on visiting the {stampData.name}! This stamp has been added to your digital passport.
             </p>
             
             <div className="w-full max-w-sm bg-white rounded-xl p-5 shadow-md mb-8 animate-zoom-in">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="font-bold text-masar-teal">Dubai Mall</h3>
-                  <p className="text-sm text-masar-teal/70">Dubai</p>
+                  <h3 className="font-bold text-masar-teal">{stampData.name}</h3>
+                  <p className="text-sm text-masar-teal/70">{stampData.emirateName}</p>
                 </div>
                 <div className="w-16 h-16 bg-masar-gold/20 rounded-full flex items-center justify-center">
-                  <span className="text-masar-gold text-xl">🛍️</span>
+                  <span className="text-masar-gold text-xl">{stampData.icon}</span>
                 </div>
               </div>
               
               <div className="text-sm text-masar-teal/80">
-                <p>Home to over 1,200 retail outlets and 200 food & beverage outlets, Dubai Mall is one of the world's largest shopping destinations.</p>
+                <p>{stampData.description}</p>
               </div>
             </div>
           </div>

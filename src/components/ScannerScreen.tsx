@@ -3,11 +3,20 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Camera } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
+
+// Simulated data for demo purposes - normally would come from the QR code
+const demoStampData = {
+  emirateId: 'dubai',
+  locationId: 4, // Dubai Creek
+  name: 'Dubai Creek',
+  timestamp: new Date().toISOString()
+};
 
 const ScannerScreen = () => {
   const [scanning, setScanning] = useState(true);
   const navigate = useNavigate();
+  const { toast } = useToast();
   
   useEffect(() => {
     // For demo purposes, simulate QR scanning after a few seconds
@@ -26,11 +35,56 @@ const ScannerScreen = () => {
     navigate(-1);
   };
   
+  // Function to save the collected stamp data
+  const saveCollectedStamp = (stampData) => {
+    // Don't save for demo users
+    const userName = localStorage.getItem('userName');
+    const isDemoUser = userName === 'Demo User';
+    if (isDemoUser) return;
+    
+    try {
+      // Get existing stamps from localStorage
+      const existingStampsString = localStorage.getItem('collectedStamps');
+      let collectedStamps = {};
+      
+      if (existingStampsString) {
+        collectedStamps = JSON.parse(existingStampsString);
+      }
+      
+      // Add the new stamp
+      if (!collectedStamps[stampData.emirateId]) {
+        collectedStamps[stampData.emirateId] = [];
+      }
+      
+      // Check if this stamp was already collected
+      const alreadyCollected = collectedStamps[stampData.emirateId].some(
+        stamp => stamp.locationId === stampData.locationId
+      );
+      
+      if (!alreadyCollected) {
+        collectedStamps[stampData.emirateId].push({
+          locationId: stampData.locationId,
+          name: stampData.name,
+          collectedAt: stampData.timestamp
+        });
+        
+        // Save to localStorage
+        localStorage.setItem('collectedStamps', JSON.stringify(collectedStamps));
+      }
+    } catch (error) {
+      console.error("Error saving stamp data:", error);
+    }
+  };
+  
   // For demo purposes, add a way to manually trigger scanning success
   const triggerSuccess = () => {
+    // Save the stamp data
+    saveCollectedStamp(demoStampData);
+    
     toast({
       title: "QR Code detected!",
     });
+    
     navigate('/stamp-earned');
   };
 
