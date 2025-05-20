@@ -71,7 +71,7 @@ const HomeScreen = () => {
       {/* Header */}
       <div className="bg-masar-blue text-white p-6 rounded-b-2xl">
         <div className="flex justify-between items-center">
-          <img src="/lovable-uploads/a92a45f1-1537-447f-81fb-efca16896380.png" alt="Masar Logo" className="h-8" />
+          <img alt="Masar Logo" src="/lovable-uploads/7df6787e-769a-4712-aabe-7322b3d7144b.png" className="h-8 object-fill" />
           <div className="flex items-center space-x-2">
             <span className="text-sm font-medium">
               {totalCollectedStamps}/{totalStamps} Stamps
