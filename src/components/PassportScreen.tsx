@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -32,7 +33,7 @@ const PassportScreen = () => {
   const [touchEnd, setTouchEnd] = useState(0);
   const [userName, setUserName] = useState('Explorer');
   const [userJoinDate, setUserJoinDate] = useState('');
-  const [collectedStampsData, setCollectedStampsData] = useState({});
+  const [collectedStampsData, setCollectedStampsData] = useState<Record<string, any[]>>({});
   const { emirateId } = useParams();
   const navigate = useNavigate();
 
@@ -107,14 +108,16 @@ const PassportScreen = () => {
     navigate('/scan');
   };
 
-  const handleStampClick = locationId => {
-    const location = emirateData?.locations.find(l => l.id === locationId);
-    if (location?.collected) {
-      navigate(`/stamp/${emirateData?.id}/${locationId}`);
+  const handleStampClick = (locationId: number) => {
+    if (emirateData && emirateData.locations) {
+      const location = emirateData.locations.find(l => l.id === locationId);
+      if (location?.collected) {
+        navigate(`/stamp/${emirateData.id}/${locationId}`);
+      }
     }
   };
 
-  const handleAddMemory = locationId => {
+  const handleAddMemory = (locationId: number) => {
     navigate(`/stamp-earned`);
   };
 
@@ -139,11 +142,11 @@ const PassportScreen = () => {
   };
 
   // Touch event handlers for swiping
-  const handleTouchStart = e => {
+  const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStart(e.targetTouches[0].clientX);
   };
 
-  const handleTouchMove = e => {
+  const handleTouchMove = (e: React.TouchEvent) => {
     setTouchEnd(e.targetTouches[0].clientX);
   };
 
@@ -215,7 +218,7 @@ const PassportScreen = () => {
                     <Avatar className="w-24 h-24 border-2 border-masar-gold">
                       <AvatarImage src="/lovable-uploads/984e2ec2-cb8a-4d95-afeb-0e2d2195bd08.png" alt="Explorer Profile" />
                       <AvatarFallback className="bg-masar-teal text-white text-xl">
-                        {userName?.charAt(0) || 'E'}
+                        {userName ? userName.charAt(0) : 'E'}
                       </AvatarFallback>
                     </Avatar>
                     <div className="absolute -bottom-2 -right-2 bg-masar-teal text-white text-xs rounded-full w-8 h-8 flex items-center justify-center border-2 border-white">
@@ -278,10 +281,10 @@ const PassportScreen = () => {
               {/* Right Page - Stamps */}
               <div className="w-1/2 h-full bg-white p-4 flex flex-col relative">
                 <h3 className="text-center font-serif text-lg font-bold text-masar-blue uppercase tracking-wider mb-2">
-                  {emirateData.name}
+                  {emirateData?.name || 'Emirates'}
                 </h3>
                 <p className="text-center text-xs text-masar-blue/60 mb-4">
-                  {emirateData.locations.filter(l => l.collected).length}/{emirateData.locations.length} Stamps
+                  {emirateData ? `${emirateData.locations.filter(l => l.collected).length}/${emirateData.locations.length} Stamps` : '0/0 Stamps'}
                 </p>
                 
                 {/* Navigation buttons */}
@@ -312,68 +315,70 @@ const PassportScreen = () => {
                 )}
                 
                 <div className="flex-1 overflow-y-auto">
-                  <div className="grid grid-cols-2 gap-4">
-                    {emirateData.locations.map(location => (
-                      <div 
-                        key={location.id} 
-                        className={`aspect-square rounded-full flex flex-col items-center justify-center relative overflow-hidden ${
-                          location.collected ? 'bg-masar-gold/20 cursor-pointer' : 'bg-gray-100 opacity-80'
-                        }`} 
-                        onClick={e => {
-                          e.stopPropagation();
-                          handleStampClick(location.id);
-                        }}
-                      >
-                        {/* Stamp border - dotted circle */}
-                        <div className="absolute inset-0 border-4 rounded-full border-dashed border-masar-blue/20 flex items-center justify-center">
-                          {!location.collected && <Lock className="h-6 w-6 text-masar-red" />}
-                        </div>
-                        
-                        {location.collected && (
-                          <>
-                            {/* Stamp background with icon */}
-                            <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
-                              <div className="absolute inset-0 bg-masar-gold/20"></div>
-                              <div className="w-3/4 h-3/4 rounded-full overflow-hidden">
-                                <img src={location.icon} alt={location.name} className="w-full h-full object-cover opacity-90" />
-                              </div>
-                            </div>
-                            
-                            {/* Stamp details */}
-                            <div className="absolute bottom-0 left-0 right-0 bg-masar-teal/80 py-1 px-2">
-                              <div className="text-[10px] text-center text-white font-medium">
-                                {location.name}
-                              </div>
-                              <div className="text-[8px] text-center text-white/80">
-                                {location.collectedDate}
-                              </div>
-                            </div>
-                            
-                            {/* Add memory button */}
-                            <div className="absolute top-0 right-0 p-1">
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="h-6 w-6 p-0 text-masar-blue bg-white/80 rounded-full" 
-                                onClick={e => {
-                                  e.stopPropagation();
-                                  handleAddMemory(location.id);
-                                }}
-                              >
-                                <Camera className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          </>
-                        )}
-                        
-                        {!location.collected && (
-                          <div className="text-xs text-center text-gray-500 mt-8 px-2">
-                            {location.name}
+                  {emirateData && (
+                    <div className="grid grid-cols-2 gap-4">
+                      {emirateData.locations.map(location => (
+                        <div 
+                          key={location.id} 
+                          className={`aspect-square rounded-full flex flex-col items-center justify-center relative overflow-hidden ${
+                            location.collected ? 'bg-masar-gold/20 cursor-pointer' : 'bg-gray-100 opacity-80'
+                          }`} 
+                          onClick={e => {
+                            e.stopPropagation();
+                            handleStampClick(location.id);
+                          }}
+                        >
+                          {/* Stamp border - dotted circle */}
+                          <div className="absolute inset-0 border-4 rounded-full border-dashed border-masar-blue/20 flex items-center justify-center">
+                            {!location.collected && <Lock className="h-6 w-6 text-masar-red" />}
                           </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+                          
+                          {location.collected && (
+                            <>
+                              {/* Stamp background with icon */}
+                              <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+                                <div className="absolute inset-0 bg-masar-gold/20"></div>
+                                <div className="w-3/4 h-3/4 rounded-full overflow-hidden">
+                                  <img src={location.icon} alt={location.name} className="w-full h-full object-cover opacity-90" />
+                                </div>
+                              </div>
+                              
+                              {/* Stamp details */}
+                              <div className="absolute bottom-0 left-0 right-0 bg-masar-teal/80 py-1 px-2">
+                                <div className="text-[10px] text-center text-white font-medium">
+                                  {location.name}
+                                </div>
+                                <div className="text-[8px] text-center text-white/80">
+                                  {location.collectedDate}
+                                </div>
+                              </div>
+                              
+                              {/* Add memory button */}
+                              <div className="absolute top-0 right-0 p-1">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-6 w-6 p-0 text-masar-blue bg-white/80 rounded-full" 
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    handleAddMemory(location.id);
+                                  }}
+                                >
+                                  <Camera className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </>
+                          )}
+                          
+                          {!location.collected && (
+                            <div className="text-xs text-center text-gray-500 mt-8 px-2">
+                              {location.name}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 
                 {/* Page number */}
@@ -419,3 +424,4 @@ const PassportScreen = () => {
 };
 
 export default PassportScreen;
+
