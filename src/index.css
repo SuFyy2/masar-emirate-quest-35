@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Poppins:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,83 +5,83 @@
 
 @layer base {
   :root {
-    --background: 37 33% 97%;     /* Cream background #FDF8F3 */
-    --foreground: 200 82% 22%;    /* Deep blue text #004369 */
+    --background: 50 50% 96%;    /* Cream background */
+    --foreground: 174 85% 33%;   /* Teal text color */
 
     --card: 0 0% 100%;
-    --card-foreground: 200 82% 22%;
+    --card-foreground: 174 85% 33%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 200 82% 22%;
+    --popover-foreground: 174 85% 33%;
 
-    --primary: 200 82% 22%;       /* Deep blue as primary #004369 */
-    --primary-foreground: 37 33% 97%;
+    --primary: 174 85% 33%;      /* Teal as primary */
+    --primary-foreground: 50 50% 96%;
 
-    --secondary: 41 64% 55%;      /* Gold as secondary #D9A441 */
+    --secondary: 42 70% 59%;     /* Gold as secondary */
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 180 100% 33%;        /* Teal as muted #00A8A8 */
-    --muted-foreground: 37 33% 97%;
+    --muted: 165 47% 77%;        /* Light mint */
+    --muted-foreground: 174 85% 33%;
 
-    --accent: 41 64% 55%;         /* Gold as accent #D9A441 */
+    --accent: 42 70% 59%;        /* Gold as accent */
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 350 79% 49%;   /* Red #DB1F48 */
-    --destructive-foreground: 37 33% 97%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 180 100% 33%;       /* Teal border */
-    --input: 180 100% 33%;
-    --ring: 200 82% 22%;
+    --border: 165 47% 77%;       /* Mint border */
+    --input: 165 47% 77%;
+    --ring: 174 85% 33%;
 
     --radius: 1rem;              /* Rounded corners */
 
-    --sidebar-background: 200 82% 22%;
-    --sidebar-foreground: 37 33% 97%;
-    --sidebar-primary: 41 64% 55%;
+    --sidebar-background: 174 85% 33%;
+    --sidebar-foreground: 50 50% 96%;
+    --sidebar-primary: 42 70% 59%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 180 100% 33%;
-    --sidebar-accent-foreground: 200 82% 22%;
-    --sidebar-border: 200 82% 22%;
-    --sidebar-ring: 41 64% 55%;
+    --sidebar-accent: 165 47% 77%;
+    --sidebar-accent-foreground: 174 85% 33%;
+    --sidebar-border: 174 85% 33%;
+    --sidebar-ring: 42 70% 59%;
   }
 
   .dark {
-    --background: 200 82% 15%;    /* Darker blue background */
-    --foreground: 37 33% 97%;
+    --background: 174 85% 20%;   /* Darker teal background */
+    --foreground: 50 50% 96%;
 
-    --card: 200 82% 10%;
-    --card-foreground: 37 33% 97%;
+    --card: 174 85% 15%;
+    --card-foreground: 50 50% 96%;
 
-    --popover: 200 82% 10%;
-    --popover-foreground: 37 33% 97%;
+    --popover: 174 85% 15%;
+    --popover-foreground: 50 50% 96%;
 
-    --primary: 41 64% 55%;        /* Gold as primary in dark mode */
+    --primary: 42 70% 59%;       /* Gold as primary in dark mode */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 200 82% 22%;     /* Deep blue as secondary in dark mode */
-    --secondary-foreground: 37 33% 97%;
+    --secondary: 174 85% 33%;    /* Teal as secondary in dark mode */
+    --secondary-foreground: 50 50% 96%;
 
-    --muted: 200 82% 18%;
-    --muted-foreground: 37 33% 97%;
+    --muted: 174 85% 25%;
+    --muted-foreground: 50 50% 96%;
 
-    --accent: 180 100% 33%;       /* Teal as accent in dark mode */
-    --accent-foreground: 200 82% 22%;
+    --accent: 165 47% 77%;       /* Mint as accent in dark mode */
+    --accent-foreground: 174 85% 33%;
 
-    --destructive: 350 79% 40%;
-    --destructive-foreground: 37 33% 97%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 50 50% 96%;
 
-    --border: 200 82% 35%;
-    --input: 200 82% 35%;
-    --ring: 41 64% 55%;
+    --border: 174 85% 40%;
+    --input: 174 85% 40%;
+    --ring: 42 70% 59%;
     
-    --sidebar-background: 200 82% 10%;
-    --sidebar-foreground: 37 33% 97%;
-    --sidebar-primary: 41 64% 55%;
+    --sidebar-background: 174 85% 15%;
+    --sidebar-foreground: 50 50% 96%;
+    --sidebar-primary: 42 70% 59%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 180 100% 33%;
-    --sidebar-accent-foreground: 200 82% 15%;
-    --sidebar-border: 200 82% 22%;
-    --sidebar-ring: 41 64% 55%;
+    --sidebar-accent: 165 47% 77%;
+    --sidebar-accent-foreground: 174 85% 20%;
+    --sidebar-border: 174 85% 33%;
+    --sidebar-ring: 42 70% 59%;
   }
 }
 
@@ -95,38 +94,21 @@
     @apply bg-background text-foreground;
     font-family: 'Poppins', 'Segoe UI', sans-serif;
   }
-
-  h1, h2, h3 {
-    font-family: 'DM Serif Display', serif;
-  }
-
-  h4, h5, h6 {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 500; /* Medium */
-  }
-
-  button, .cta {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600; /* SemiBold */
-  }
 }
 
-/* Enhanced Flip Card Animation */
 .flip-card {
-  perspective: 1500px;
+  perspective: 1000px;
 }
 
 .flip-card-inner {
-  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.5s;
   transform-style: preserve-3d;
-  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.2);
 }
 
 .flip-card-front,
 .flip-card-back {
   position: absolute;
   backface-visibility: hidden;
-  -webkit-backface-visibility: hidden; /* Safari support */
 }
 
 .flip-card-back {
@@ -137,22 +119,6 @@
   transform: rotateY(180deg);
 }
 
-/* Page turn effect */
-.page-turn {
-  position: absolute;
-  right: 0;
-  height: 100%;
-  width: 50%;
-  transform-origin: left center;
-  transition: transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1);
-  background: linear-gradient(to right, rgba(0,0,0,0.05), rgba(0,0,0,0));
-}
-
-.page-turn-active {
-  transform: rotateY(-180deg);
-}
-
-/* Confetti Animation */
 .confetti-container {
   position: fixed;
   top: 0;
@@ -168,49 +134,4 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-}
-
-/* Additional animations */
-@keyframes scanAnimation {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(256px); }
-  100% { transform: translateY(0); }
-}
-
-@keyframes pageFlip {
-  0% { transform: rotateY(0); }
-  100% { transform: rotateY(-180deg); }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
-}
-
-@keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-/* Animation classes */
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-.animate-pulse-slow {
-  animation: pulse 2s ease-in-out infinite;
-}
-
-.animate-spin-slow {
-  animation: spin-slow 20s linear infinite;
-}
-
-/* Smooth transitions */
-.smooth-transition {
-  transition: all 0.3s ease-in-out;
 }

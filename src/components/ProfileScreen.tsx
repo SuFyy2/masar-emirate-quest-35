@@ -1,168 +1,45 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, User, Map, Compass, Star, Edit, Save } from 'lucide-react';
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
+import { ArrowLeft, User, Map, Compass, Star } from 'lucide-react';
 
-const emitatesData = [{
-  id: 'abu-dhabi',
-  name: 'Abu Dhabi',
-  collected: 2,
-  total: 5
-}, {
-  id: 'dubai',
-  name: 'Dubai',
-  collected: 3,
-  total: 5
-}, {
-  id: 'sharjah',
-  name: 'Sharjah',
-  collected: 0,
-  total: 5
-}, {
-  id: 'ajman',
-  name: 'Ajman',
-  collected: 1,
-  total: 5
-}, {
-  id: 'umm-al-quwain',
-  name: 'Umm Al Quwain',
-  collected: 0,
-  total: 5
-}, {
-  id: 'fujairah',
-  name: 'Fujairah',
-  collected: 0,
-  total: 5
-}, {
-  id: 'ras-al-khaimah',
-  name: 'Ras Al Khaimah',
-  collected: 0,
-  total: 5
-}];
-
-// User profile default values
-const defaultUserProfile = {
-  fullName: '',
-  email: '',
-  bio: '',
-  favoriteEmiratesPlace: '',
-  hometown: ''
-};
+const emitatesData = [
+  { id: 'abu-dhabi', name: 'Abu Dhabi', collected: 2, total: 5 },
+  { id: 'dubai', name: 'Dubai', collected: 3, total: 5 },
+  { id: 'sharjah', name: 'Sharjah', collected: 0, total: 5 },
+  { id: 'ajman', name: 'Ajman', collected: 1, total: 5 },
+  { id: 'umm-al-quwain', name: 'Umm Al Quwain', collected: 0, total: 5 },
+  { id: 'fujairah', name: 'Fujairah', collected: 0, total: 5 },
+  { id: 'ras-al-khaimah', name: 'Ras Al Khaimah', collected: 0, total: 5 }
+];
 
 const ProfileScreen = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [userName, setUserName] = useState('Explorer');
-  const [isNewOrDemoUser, setIsNewOrDemoUser] = useState(false);
-  const [isDemoUser, setIsDemoUser] = useState(false);
   
-  // Profile editing state
-  const [isEditing, setIsEditing] = useState(false);
-  const [userProfile, setUserProfile] = useState(defaultUserProfile);
-  
-  useEffect(() => {
-    // Get the current username from localStorage whenever component mounts
-    const storedUserName = localStorage.getItem('userName');
-    if (storedUserName) {
-      setUserName(storedUserName);
-      
-      // Check if demo user
-      if (storedUserName === 'Demo User') {
-        setIsDemoUser(true);
-        setIsNewOrDemoUser(true);
-      } else {
-        // Check if new user (first time viewing profile)
-        const hasViewedProfileBefore = localStorage.getItem('hasViewedProfileBefore');
-        if (!hasViewedProfileBefore) {
-          localStorage.setItem('hasViewedProfileBefore', 'true');
-          setIsNewOrDemoUser(true);
-        }
-      }
-    }
-    
-    // Load saved profile data if it exists
-    if (!isDemoUser) {
-      const savedProfile = localStorage.getItem('userProfile');
-      if (savedProfile) {
-        setUserProfile(JSON.parse(savedProfile));
-      } else {
-        // Initialize with username if available
-        setUserProfile({
-          ...defaultUserProfile,
-          fullName: storedUserName || 'Explorer'
-        });
-      }
-    }
-  }, [isDemoUser]);
-
-  // For new/demo users, show 0 collected stamps
-  let totalCollected = emitatesData.reduce((sum, emirate) => sum + emirate.collected, 0);
+  const totalCollected = emitatesData.reduce((sum, emirate) => sum + emirate.collected, 0);
   const totalStamps = emitatesData.reduce((sum, emirate) => sum + emirate.total, 0);
+  const completionPercentage = Math.round((totalCollected / totalStamps) * 100);
   
-  // Reset progress for new and demo users
-  if (isNewOrDemoUser) {
-    totalCollected = 0;
-  }
+  const userName = localStorage.getItem('userName') || 'Explorer';
   
-  const completionPercentage = isNewOrDemoUser ? 0 : Math.round(totalCollected / totalStamps * 100);
-
   const handleLogout = () => {
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('userName');
-    localStorage.removeItem('hasViewedHomeScreen');
-    localStorage.removeItem('hasViewedProfileBefore');
     navigate('/login');
-  };
-  
-  const handleLogin = () => {
-    navigate('/login');
-  };
-  
-  const toggleEditMode = () => {
-    setIsEditing(!isEditing);
-  };
-  
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setUserProfile(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-  
-  const saveProfile = () => {
-    // Don't save for demo users
-    if (isDemoUser) {
-      toast({
-        title: "Demo Mode",
-        description: "Profile changes aren't saved in demo mode. Please log in to save your profile.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    // Save to localStorage
-    localStorage.setItem('userProfile', JSON.stringify(userProfile));
-    setIsEditing(false);
-    
-    toast({
-      title: "Profile Updated",
-      description: "Your profile information has been saved.",
-    });
   };
 
   return (
     <div className="min-h-screen bg-masar-cream pb-20">
       {/* Header */}
-      <div className="text-white p-4 bg-masar-blue">
+      <div className="bg-masar-teal text-white p-4">
         <div className="flex items-center">
-          <Button variant="ghost" className="text-white p-2 h-auto" onClick={() => navigate(-1)}>
+          <Button 
+            variant="ghost" 
+            className="text-white p-2 h-auto" 
+            onClick={() => navigate(-1)}
+          >
             <ArrowLeft className="w-6 h-6" />
           </Button>
           <h1 className="text-xl font-bold ml-2">My Profile</h1>
@@ -176,106 +53,12 @@ const ProfileScreen = () => {
             <User className="w-10 h-10 text-masar-teal" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-masar-gold">{userName}</h2>
-            <p className="text-masar-red">
+            <h2 className="text-xl font-bold text-masar-teal">{userName}</h2>
+            <p className="text-masar-teal/70">
               {completionPercentage}% Explorer
             </p>
           </div>
-          
-          {/* Edit button - only shown for logged in users */}
-          {!isDemoUser && (
-            <Button 
-              variant="ghost" 
-              onClick={toggleEditMode} 
-              className="ml-auto p-2 h-auto"
-            >
-              {isEditing ? <Save className="w-5 h-5 text-masar-teal" /> : <Edit className="w-5 h-5 text-masar-teal" />}
-            </Button>
-          )}
         </div>
-        
-        {/* User Profile Fields */}
-        <Card className="mb-6 p-4 bg-white shadow-sm">
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
-              <Input 
-                id="fullName"
-                name="fullName"
-                value={userProfile.fullName}
-                onChange={handleInputChange}
-                disabled={!isEditing || isDemoUser}
-                className={isEditing ? "bg-masar-cream/50" : "bg-transparent"}
-                placeholder="Your full name"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input 
-                id="email"
-                name="email"
-                type="email"
-                value={userProfile.email}
-                onChange={handleInputChange}
-                disabled={!isEditing || isDemoUser}
-                className={isEditing ? "bg-masar-cream/50" : "bg-transparent"}
-                placeholder="Your email address"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="hometown">Hometown</Label>
-              <Input 
-                id="hometown"
-                name="hometown"
-                value={userProfile.hometown}
-                onChange={handleInputChange}
-                disabled={!isEditing || isDemoUser}
-                className={isEditing ? "bg-masar-cream/50" : "bg-transparent"}
-                placeholder="Where are you from?"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="favoriteEmiratesPlace">Favorite Place in UAE</Label>
-              <Input 
-                id="favoriteEmiratesPlace"
-                name="favoriteEmiratesPlace"
-                value={userProfile.favoriteEmiratesPlace}
-                onChange={handleInputChange}
-                disabled={!isEditing || isDemoUser}
-                className={isEditing ? "bg-masar-cream/50" : "bg-transparent"}
-                placeholder="Your favorite place in UAE"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="bio">Bio</Label>
-              <Textarea 
-                id="bio"
-                name="bio"
-                value={userProfile.bio}
-                onChange={handleInputChange}
-                disabled={!isEditing || isDemoUser}
-                className={isEditing ? "bg-masar-cream/50" : "bg-transparent"}
-                placeholder="Tell us about yourself"
-                rows={3}
-              />
-            </div>
-            
-            {/* Save button - only visible in edit mode and for logged in users */}
-            {isEditing && !isDemoUser && (
-              <Button 
-                variant="default" 
-                onClick={saveProfile}
-                className="w-full bg-masar-teal hover:bg-masar-teal/90 mt-2"
-              >
-                Save Profile
-              </Button>
-            )}
-          </div>
-        </Card>
         
         {/* Stats Cards */}
         <div className="grid grid-cols-2 gap-4 mb-6">
@@ -284,7 +67,7 @@ const ProfileScreen = () => {
               <Map className="w-5 h-5 text-masar-teal mr-2" />
               <h3 className="font-medium text-masar-teal">Total Stamps</h3>
             </div>
-            <p className="text-2xl font-bold text-masar-teal">{isNewOrDemoUser ? 0 : totalCollected}/{totalStamps}</p>
+            <p className="text-2xl font-bold text-masar-teal">{totalCollected}/{totalStamps}</p>
           </Card>
           
           <Card className="p-4 bg-masar-gold/20">
@@ -293,55 +76,67 @@ const ProfileScreen = () => {
               <h3 className="font-medium text-masar-teal">Emirates</h3>
             </div>
             <p className="text-2xl font-bold text-masar-teal">
-              {isNewOrDemoUser ? 0 : emitatesData.filter(e => e.collected > 0).length}/{emitatesData.length}
+              {emitatesData.filter(e => e.collected > 0).length}/{emitatesData.length}
             </p>
           </Card>
         </div>
         
         {/* Progress By Emirate */}
-        <h3 className="text-lg font-bold mb-3 text-masar-gold">Progress by Emirate</h3>
+        <h3 className="text-lg font-bold text-masar-teal mb-3">Progress by Emirate</h3>
         <div className="space-y-4 mb-8">
-          {emitatesData.map(emirate => <div key={emirate.id} className="rounded-lg p-4 shadow-sm bg-masar-cream">
+          {emitatesData.map((emirate) => (
+            <div key={emirate.id} className="bg-white rounded-lg p-4 shadow-sm">
               <div className="flex justify-between items-center mb-2">
-                <h4 className="font-medium text-masar-blue">{emirate.name}</h4>
-                <span className="text-sm text-masar-gold">
-                  {isNewOrDemoUser ? 0 : emirate.collected}/{emirate.total} stamps
+                <h4 className="font-medium text-masar-teal">{emirate.name}</h4>
+                <span className="text-sm text-masar-teal/70">
+                  {emirate.collected}/{emirate.total} stamps
                 </span>
               </div>
               <div className="h-2 bg-gray-100 rounded-full">
-                <div style={{
-              width: `${isNewOrDemoUser ? 0 : (emirate.collected / emirate.total * 100)}%`
-            }} className="h-2 rounded-full bg-masar-teal" />
+                <div 
+                  className="h-2 bg-masar-teal rounded-full" 
+                  style={{ width: `${(emirate.collected / emirate.total) * 100}%` }} 
+                />
               </div>
-            </div>)}
+            </div>
+          ))}
         </div>
         
-        {/* Show Login button for demo users, Logout button for regular users */}
-        {isDemoUser ? (
-          <Button variant="outline" onClick={handleLogin} className="w-full border-masar-teal text-masar-teal">
-            Log In
-          </Button>
-        ) : (
-          <Button variant="outline" onClick={handleLogout} className="w-full border-masar-teal text-masar-teal">
-            Log Out
-          </Button>
-        )}
+        {/* Settings & Logout */}
+        <Button 
+          variant="outline"
+          onClick={handleLogout}
+          className="w-full border-masar-teal text-masar-teal"
+        >
+          Log Out
+        </Button>
       </div>
       
       {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
         <div className="flex justify-around">
-          <Button variant="ghost" className="flex flex-col items-center text-gray-400" onClick={() => navigate('/home')}>
+          <Button 
+            variant="ghost" 
+            className="flex flex-col items-center text-gray-400"
+            onClick={() => navigate('/home')}
+          >
             <Map className="w-6 h-6" />
             <span className="text-xs mt-1">Explore</span>
           </Button>
-          <Button variant="ghost" className="flex flex-col items-center text-gray-400" onClick={() => navigate('/scan')}>
+          <Button 
+            variant="ghost" 
+            className="flex flex-col items-center text-gray-400"
+            onClick={() => navigate('/scan')}
+          >
             <div className="bg-gray-200 rounded-full p-3 -mt-8 border-4 border-white">
               <Compass className="w-6 h-6 text-gray-500" />
             </div>
             <span className="text-xs mt-1">Scan</span>
           </Button>
-          <Button variant="ghost" className="flex flex-col items-center text-masar-teal">
+          <Button 
+            variant="ghost" 
+            className="flex flex-col items-center text-masar-teal"
+          >
             <User className="w-6 h-6" />
             <span className="text-xs mt-1">Profile</span>
           </Button>
