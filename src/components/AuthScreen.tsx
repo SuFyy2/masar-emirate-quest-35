@@ -1,19 +1,22 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from '@/hooks/use-toast';
+
 const AuthScreen = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const navigate = useNavigate();
+  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     // Simple validation
-    if (!email || !password || !isLogin && !name) {
+    if (!email || !password || (!isLogin && !name)) {
       toast({
         title: "Please fill in all fields",
         variant: "destructive"
@@ -21,21 +24,67 @@ const AuthScreen = () => {
       return;
     }
 
-    // For demo purposes, we'll just simulate authentication
-    localStorage.setItem('isAuthenticated', 'true');
-
-    // If it's a new signup, store the user's name
-    if (!isLogin) {
+    if (isLogin) {
+      // Check if this user has signed up before
+      const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+      const foundUser = registeredUsers.find((user: any) => user.email === email);
+      
+      if (!foundUser) {
+        toast({
+          title: "Account not found",
+          description: "Please sign up first",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // User exists, proceed with login and set the userName from the stored user data
+      localStorage.setItem('isAuthenticated', 'true');
+      localStorage.setItem('currentUserEmail', email);
+      localStorage.setItem('userName', foundUser.name); // Set the username from the found user
+      
+      toast({
+        title: "Login successful!",
+        description: "Welcome back to Masar"
+      });
+      
+      navigate('/home');
+    } else {
+      // This is a sign up
+      const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+      const userExists = registeredUsers.some((user: any) => user.email === email);
+      
+      if (userExists) {
+        toast({
+          title: "Email already registered",
+          description: "Please log in instead",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Register the new user
+      registeredUsers.push({
+        email,
+        name,
+        password, // Note: In a real app, never store passwords in plaintext
+        registeredAt: new Date().toISOString()
+      });
+      
+      localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+      localStorage.setItem('isAuthenticated', 'true');
+      localStorage.setItem('currentUserEmail', email);
       localStorage.setItem('userName', name);
+      
+      toast({
+        title: "Account created!",
+        description: "Welcome to Masar"
+      });
+      
+      navigate('/home');
     }
-    toast({
-      title: isLogin ? "Login successful!" : "Account created!",
-      description: "Welcome to Masar"
-    });
-
-    // Navigate to home screen
-    navigate('/home');
   };
+
   return <div className="min-h-screen flex flex-col bg-masar-cream">
       <div className="flex-1 flex flex-col justify-center items-center px-8 pt-8">
         <div className="mb-8 animate-fade-in">
@@ -76,6 +125,16 @@ const AuthScreen = () => {
             // For demo purposes, skip login
             localStorage.setItem('isAuthenticated', 'true');
             localStorage.setItem('userName', 'Demo User');
+            
+            // Reset progress tracking for demo user
+            localStorage.removeItem('hasViewedHomeScreen');
+            localStorage.removeItem('hasViewedProfileBefore');
+            
+            toast({
+              title: "Welcome, Demo User!",
+              description: "You're using a demo account with no progress"
+            });
+            
             navigate('/home');
           }} className="text-masar-gold hover:text-masar-gold/80">
               Continue as Demo User

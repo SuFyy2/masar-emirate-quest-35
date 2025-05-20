@@ -3,7 +3,24 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Camera, MapPin, ChevronRight, ChevronLeft, Lock } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-const emitatesData = [{
+
+// Define a consistent interface for location objects
+interface Location {
+  id: number;
+  name: string;
+  collected: boolean;
+  collectedDate?: string;
+  icon: string;
+}
+
+interface Emirate {
+  id: string;
+  name: string;
+  image: string;
+  locations: Location[];
+}
+
+const emitatesData: Emirate[] = [{
   id: 'abu-dhabi',
   name: 'Abu Dhabi',
   image: 'https://images.unsplash.com/photo-1466442929976-97f336a657be?auto=format&fit=crop&w=800&q=80',
@@ -43,25 +60,30 @@ const emitatesData = [{
     id: 1,
     name: 'Burj Khalifa',
     collected: true,
-    collectedDate: '20 May 2023'
+    collectedDate: '20 May 2023',
+    icon: 'https://images.unsplash.com/photo-1483470134942-13bbf4677d84?auto=format&fit=crop&w=300&q=80'
   }, {
     id: 2,
     name: 'Dubai Mall',
     collected: true,
-    collectedDate: '20 May 2023'
+    collectedDate: '20 May 2023',
+    icon: 'https://images.unsplash.com/photo-1542357339-76e69e339b9f?auto=format&fit=crop&w=300&q=80'
   }, {
     id: 3,
     name: 'Palm Jumeirah',
     collected: true,
-    collectedDate: '21 May 2023'
+    collectedDate: '21 May 2023',
+    icon: 'https://images.unsplash.com/photo-1512632578888-169bbbc64f33?auto=format&fit=crop&w=300&q=80'
   }, {
     id: 4,
     name: 'Dubai Creek',
-    collected: false
+    collected: false,
+    icon: 'https://images.unsplash.com/photo-1526495124232-a04e1849168c?auto=format&fit=crop&w=300&q=80'
   }, {
     id: 5,
     name: 'Dubai Museum',
-    collected: false
+    collected: false,
+    icon: 'https://images.unsplash.com/photo-1576506813373-9b8d45c4fa6f?auto=format&fit=crop&w=300&q=80'
   }]
 }, {
   id: 'sharjah',
@@ -70,23 +92,28 @@ const emitatesData = [{
   locations: [{
     id: 1,
     name: 'Al Noor Island',
-    collected: false
+    collected: false,
+    icon: 'https://images.unsplash.com/photo-1593238314406-28db6be2e1c1?auto=format&fit=crop&w=300&q=80'
   }, {
     id: 2,
     name: 'Sharjah Museum of Islamic Civilization',
-    collected: false
+    collected: false,
+    icon: 'https://images.unsplash.com/photo-1554907984-89a3d7137bce?auto=format&fit=crop&w=300&q=80'
   }, {
     id: 3,
     name: 'Al Qasba Canal',
-    collected: false
+    collected: false,
+    icon: 'https://images.unsplash.com/photo-1524055988636-436cfa46e59e?auto=format&fit=crop&w=300&q=80'
   }, {
     id: 4,
     name: 'Rain Room Sharjah',
-    collected: false
+    collected: false,
+    icon: 'https://images.unsplash.com/photo-1525431836161-e40d6846e656?auto=format&fit=crop&w=300&q=80'
   }, {
     id: 5,
     name: 'Sharjah Art Museum',
-    collected: false
+    collected: false,
+    icon: 'https://images.unsplash.com/photo-1578301978018-3005759f48f7?auto=format&fit=crop&w=300&q=80'
   }]
 }, {
   id: 'ajman',
@@ -96,23 +123,28 @@ const emitatesData = [{
     id: 1,
     name: 'Ajman Museum',
     collected: true,
-    collectedDate: '5 June 2023'
+    collectedDate: '5 June 2023',
+    icon: 'https://images.unsplash.com/photo-1574236170880-fad9408b541c?auto=format&fit=crop&w=300&q=80'
   }, {
     id: 2,
     name: 'Ajman Corniche',
-    collected: false
+    collected: false,
+    icon: 'https://images.unsplash.com/photo-1519677100203-a0e668c92439?auto=format&fit=crop&w=300&q=80'
   }, {
     id: 3,
     name: 'Al Zorah Nature Reserve',
-    collected: false
+    collected: false,
+    icon: 'https://images.unsplash.com/photo-1518479044931-404a93dcaf2d?auto=format&fit=crop&w=300&q=80'
   }, {
     id: 4,
     name: 'Ajman Marina',
-    collected: false
+    collected: false,
+    icon: 'https://images.unsplash.com/photo-1521136105146-6d37ac14e72e?auto=format&fit=crop&w=300&q=80'
   }, {
     id: 5,
     name: 'Masfout Mountains',
-    collected: false
+    collected: false,
+    icon: 'https://images.unsplash.com/photo-1494500764479-0c8f2919a3d8?auto=format&fit=crop&w=300&q=80'
   }]
 }, {
   id: 'umm-al-quwain',
@@ -121,23 +153,28 @@ const emitatesData = [{
   locations: [{
     id: 1,
     name: 'UAQ Museum',
-    collected: false
+    collected: false,
+    icon: 'https://images.unsplash.com/photo-1574236170880-fad9408b541c?auto=format&fit=crop&w=300&q=80'
   }, {
     id: 2,
     name: 'Dreamland Aqua Park',
-    collected: false
+    collected: false,
+    icon: 'https://images.unsplash.com/photo-1536745287225-21d689278a41?auto=format&fit=crop&w=300&q=80'
   }, {
     id: 3,
     name: 'Al Sinniyah Island',
-    collected: false
+    collected: false,
+    icon: 'https://images.unsplash.com/photo-1506953823976-52e1fdc0149a?auto=format&fit=crop&w=300&q=80'
   }, {
     id: 4,
     name: 'UAQ Marine Club',
-    collected: false
+    collected: false,
+    icon: 'https://images.unsplash.com/photo-1566288623394-377af472d81b?auto=format&fit=crop&w=300&q=80'
   }, {
     id: 5,
     name: 'Ed Dasoodi Wildlife Sanctuary',
-    collected: false
+    collected: false,
+    icon: 'https://images.unsplash.com/photo-1500479694472-551d1fb6258d?auto=format&fit=crop&w=300&q=80'
   }]
 }, {
   id: 'fujairah',
@@ -146,23 +183,28 @@ const emitatesData = [{
   locations: [{
     id: 1,
     name: 'Al Bidyah Mosque',
-    collected: false
+    collected: false,
+    icon: 'https://images.unsplash.com/photo-1564694457332-02a623a629f5?auto=format&fit=crop&w=300&q=80'
   }, {
     id: 2,
     name: 'Fujairah Fort',
-    collected: false
+    collected: false,
+    icon: 'https://images.unsplash.com/photo-1453487021979-5b739b2849f4?auto=format&fit=crop&w=300&q=80'
   }, {
     id: 3,
     name: 'Snoopy Island',
-    collected: false
+    collected: false,
+    icon: 'https://images.unsplash.com/photo-1516091877740-fde016699f2c?auto=format&fit=crop&w=300&q=80'
   }, {
     id: 4,
     name: 'Wadi Wurayah',
-    collected: false
+    collected: false,
+    icon: 'https://images.unsplash.com/photo-1487730116645-74489c95b41b?auto=format&fit=crop&w=300&q=80'
   }, {
     id: 5,
     name: 'Ain Al Madhab Gardens',
-    collected: false
+    collected: false,
+    icon: 'https://images.unsplash.com/photo-1544027993-37dbfe43562a?auto=format&fit=crop&w=300&q=80'
   }]
 }, {
   id: 'ras-al-khaimah',
@@ -171,25 +213,31 @@ const emitatesData = [{
   locations: [{
     id: 1,
     name: 'Jebel Jais',
-    collected: false
+    collected: false,
+    icon: 'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=300&q=80'
   }, {
     id: 2,
     name: 'RAK National Museum',
-    collected: false
+    collected: false,
+    icon: 'https://images.unsplash.com/photo-1574236170880-fad9408b541c?auto=format&fit=crop&w=300&q=80'
   }, {
     id: 3,
     name: 'Al Jazirah Al Hamra',
-    collected: false
+    collected: false,
+    icon: 'https://images.unsplash.com/photo-1508035460735-91088c495500?auto=format&fit=crop&w=300&q=80'
   }, {
     id: 4,
     name: 'Dhayah Fort',
-    collected: false
+    collected: false,
+    icon: 'https://images.unsplash.com/photo-1453487021979-5b739b2849f4?auto=format&fit=crop&w=300&q=80'
   }, {
     id: 5,
     name: 'Iceland Water Park',
-    collected: false
+    collected: false,
+    icon: 'https://images.unsplash.com/photo-1536745287225-21d689278a41?auto=format&fit=crop&w=300&q=80'
   }]
 }];
+
 const PassportScreen = () => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [activeEmirateId, setActiveEmirateId] = useState('abu-dhabi');
