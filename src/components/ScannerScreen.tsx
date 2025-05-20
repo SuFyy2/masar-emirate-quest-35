@@ -43,6 +43,13 @@ const ScannerScreen = () => {
     if (isDemoUser) return;
     
     try {
+      // Set user join date if not already set
+      if (!localStorage.getItem('userJoinDate')) {
+        const now = new Date();
+        const joinDate = `${now.toLocaleString('default', { month: 'long' })} ${now.getFullYear()}`;
+        localStorage.setItem('userJoinDate', joinDate);
+      }
+      
       // Get existing stamps from localStorage
       const existingStampsString = localStorage.getItem('collectedStamps');
       let collectedStamps = {};

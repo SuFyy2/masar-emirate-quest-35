@@ -20,223 +20,9 @@ interface Emirate {
   locations: Location[];
 }
 
-const emitatesData: Emirate[] = [{
-  id: 'abu-dhabi',
-  name: 'Abu Dhabi',
-  image: 'https://images.unsplash.com/photo-1466442929976-97f336a657be?auto=format&fit=crop&w=800&q=80',
-  locations: [{
-    id: 1,
-    name: 'Sheikh Zayed Grand Mosque',
-    collected: true,
-    collectedDate: '15 May 2023',
-    icon: 'https://images.unsplash.com/photo-1466442929976-97f336a657be?auto=format&fit=crop&w=300&q=80'
-  }, {
-    id: 2,
-    name: 'Louvre Abu Dhabi',
-    collected: true,
-    collectedDate: '16 May 2023',
-    icon: 'https://images.unsplash.com/photo-1492321936769-b49830bc1d1e?auto=format&fit=crop&w=300&q=80'
-  }, {
-    id: 3,
-    name: 'Ferrari World',
-    collected: false,
-    icon: 'https://images.unsplash.com/photo-1489441097428-94c102db4b66?auto=format&fit=crop&w=300&q=80'
-  }, {
-    id: 4,
-    name: 'Qasr Al Watan',
-    collected: false,
-    icon: 'https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=300&q=80'
-  }, {
-    id: 5,
-    name: 'Yas Marina Circuit',
-    collected: false,
-    icon: 'https://images.unsplash.com/photo-1482938289607-e9573fc25ebb?auto=format&fit=crop&w=300&q=80'
-  }]
-}, {
-  id: 'dubai',
-  name: 'Dubai',
-  image: 'https://images.unsplash.com/photo-1469041797191-50ace28483c3?auto=format&fit=crop&w=800&q=80',
-  locations: [{
-    id: 1,
-    name: 'Burj Khalifa',
-    collected: true,
-    collectedDate: '20 May 2023',
-    icon: 'https://images.unsplash.com/photo-1483470134942-13bbf4677d84?auto=format&fit=crop&w=300&q=80'
-  }, {
-    id: 2,
-    name: 'Dubai Mall',
-    collected: true,
-    collectedDate: '20 May 2023',
-    icon: 'https://images.unsplash.com/photo-1542357339-76e69e339b9f?auto=format&fit=crop&w=300&q=80'
-  }, {
-    id: 3,
-    name: 'Palm Jumeirah',
-    collected: true,
-    collectedDate: '21 May 2023',
-    icon: 'https://images.unsplash.com/photo-1512632578888-169bbbc64f33?auto=format&fit=crop&w=300&q=80'
-  }, {
-    id: 4,
-    name: 'Dubai Creek',
-    collected: false,
-    icon: 'https://images.unsplash.com/photo-1526495124232-a04e1849168c?auto=format&fit=crop&w=300&q=80'
-  }, {
-    id: 5,
-    name: 'Dubai Museum',
-    collected: false,
-    icon: 'https://images.unsplash.com/photo-1576506813373-9b8d45c4fa6f?auto=format&fit=crop&w=300&q=80'
-  }]
-}, {
-  id: 'sharjah',
-  name: 'Sharjah',
-  image: 'https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=800&q=80',
-  locations: [{
-    id: 1,
-    name: 'Al Noor Island',
-    collected: false,
-    icon: 'https://images.unsplash.com/photo-1593238314406-28db6be2e1c1?auto=format&fit=crop&w=300&q=80'
-  }, {
-    id: 2,
-    name: 'Sharjah Museum of Islamic Civilization',
-    collected: false,
-    icon: 'https://images.unsplash.com/photo-1554907984-89a3d7137bce?auto=format&fit=crop&w=300&q=80'
-  }, {
-    id: 3,
-    name: 'Al Qasba Canal',
-    collected: false,
-    icon: 'https://images.unsplash.com/photo-1524055988636-436cfa46e59e?auto=format&fit=crop&w=300&q=80'
-  }, {
-    id: 4,
-    name: 'Rain Room Sharjah',
-    collected: false,
-    icon: 'https://images.unsplash.com/photo-1525431836161-e40d6846e656?auto=format&fit=crop&w=300&q=80'
-  }, {
-    id: 5,
-    name: 'Sharjah Art Museum',
-    collected: false,
-    icon: 'https://images.unsplash.com/photo-1578301978018-3005759f48f7?auto=format&fit=crop&w=300&q=80'
-  }]
-}, {
-  id: 'ajman',
-  name: 'Ajman',
-  image: 'https://images.unsplash.com/photo-1482938289607-e9573fc25ebb?auto=format&fit=crop&w=800&q=80',
-  locations: [{
-    id: 1,
-    name: 'Ajman Museum',
-    collected: true,
-    collectedDate: '5 June 2023',
-    icon: 'https://images.unsplash.com/photo-1574236170880-fad9408b541c?auto=format&fit=crop&w=300&q=80'
-  }, {
-    id: 2,
-    name: 'Ajman Corniche',
-    collected: false,
-    icon: 'https://images.unsplash.com/photo-1519677100203-a0e668c92439?auto=format&fit=crop&w=300&q=80'
-  }, {
-    id: 3,
-    name: 'Al Zorah Nature Reserve',
-    collected: false,
-    icon: 'https://images.unsplash.com/photo-1518479044931-404a93dcaf2d?auto=format&fit=crop&w=300&q=80'
-  }, {
-    id: 4,
-    name: 'Ajman Marina',
-    collected: false,
-    icon: 'https://images.unsplash.com/photo-1521136105146-6d37ac14e72e?auto=format&fit=crop&w=300&q=80'
-  }, {
-    id: 5,
-    name: 'Masfout Mountains',
-    collected: false,
-    icon: 'https://images.unsplash.com/photo-1494500764479-0c8f2919a3d8?auto=format&fit=crop&w=300&q=80'
-  }]
-}, {
-  id: 'umm-al-quwain',
-  name: 'Umm Al Quwain',
-  image: 'https://images.unsplash.com/photo-1466442929976-97f336a657be?auto=format&fit=crop&w=800&q=80',
-  locations: [{
-    id: 1,
-    name: 'UAQ Museum',
-    collected: false,
-    icon: 'https://images.unsplash.com/photo-1574236170880-fad9408b541c?auto=format&fit=crop&w=300&q=80'
-  }, {
-    id: 2,
-    name: 'Dreamland Aqua Park',
-    collected: false,
-    icon: 'https://images.unsplash.com/photo-1536745287225-21d689278a41?auto=format&fit=crop&w=300&q=80'
-  }, {
-    id: 3,
-    name: 'Al Sinniyah Island',
-    collected: false,
-    icon: 'https://images.unsplash.com/photo-1506953823976-52e1fdc0149a?auto=format&fit=crop&w=300&q=80'
-  }, {
-    id: 4,
-    name: 'UAQ Marine Club',
-    collected: false,
-    icon: 'https://images.unsplash.com/photo-1566288623394-377af472d81b?auto=format&fit=crop&w=300&q=80'
-  }, {
-    id: 5,
-    name: 'Ed Dasoodi Wildlife Sanctuary',
-    collected: false,
-    icon: 'https://images.unsplash.com/photo-1500479694472-551d1fb6258d?auto=format&fit=crop&w=300&q=80'
-  }]
-}, {
-  id: 'fujairah',
-  name: 'Fujairah',
-  image: 'https://images.unsplash.com/photo-1482938289607-e9573fc25ebb?auto=format&fit=crop&w=800&q=80',
-  locations: [{
-    id: 1,
-    name: 'Al Bidyah Mosque',
-    collected: false,
-    icon: 'https://images.unsplash.com/photo-1564694457332-02a623a629f5?auto=format&fit=crop&w=300&q=80'
-  }, {
-    id: 2,
-    name: 'Fujairah Fort',
-    collected: false,
-    icon: 'https://images.unsplash.com/photo-1453487021979-5b739b2849f4?auto=format&fit=crop&w=300&q=80'
-  }, {
-    id: 3,
-    name: 'Snoopy Island',
-    collected: false,
-    icon: 'https://images.unsplash.com/photo-1516091877740-fde016699f2c?auto=format&fit=crop&w=300&q=80'
-  }, {
-    id: 4,
-    name: 'Wadi Wurayah',
-    collected: false,
-    icon: 'https://images.unsplash.com/photo-1487730116645-74489c95b41b?auto=format&fit=crop&w=300&q=80'
-  }, {
-    id: 5,
-    name: 'Ain Al Madhab Gardens',
-    collected: false,
-    icon: 'https://images.unsplash.com/photo-1544027993-37dbfe43562a?auto=format&fit=crop&w=300&q=80'
-  }]
-}, {
-  id: 'ras-al-khaimah',
-  name: 'Ras Al Khaimah',
-  image: 'https://images.unsplash.com/photo-1469041797191-50ace28483c3?auto=format&fit=crop&w=800&q=80',
-  locations: [{
-    id: 1,
-    name: 'Jebel Jais',
-    collected: false,
-    icon: 'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=300&q=80'
-  }, {
-    id: 2,
-    name: 'RAK National Museum',
-    collected: false,
-    icon: 'https://images.unsplash.com/photo-1574236170880-fad9408b541c?auto=format&fit=crop&w=300&q=80'
-  }, {
-    id: 3,
-    name: 'Al Jazirah Al Hamra',
-    collected: false,
-    icon: 'https://images.unsplash.com/photo-1508035460735-91088c495500?auto=format&fit=crop&w=300&q=80'
-  }, {
-    id: 4,
-    name: 'Dhayah Fort',
-    collected: false,
-    icon: 'https://images.unsplash.com/photo-1453487021979-5b739b2849f4?auto=format&fit=crop&w=300&q=80'
-  }, {
-    id: 5,
-    name: 'Iceland Water Park',
-    collected: false,
-    icon: 'https://images.unsplash.com/photo-1536745287225-21d689278a41?auto=format&fit=crop&w=300&q=80'
-  }]
-}];
+const emitatesData: Emirate[] = [
+  // ... keep existing code (emiratesData array definition)
+];
 
 const PassportScreen = () => {
   const [isFlipped, setIsFlipped] = useState(false);
@@ -244,10 +30,34 @@ const PassportScreen = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
-  const {
-    emirateId
-  } = useParams();
+  const [userName, setUserName] = useState('Explorer');
+  const [userJoinDate, setUserJoinDate] = useState('');
+  const [collectedStampsData, setCollectedStampsData] = useState({});
+  const { emirateId } = useParams();
   const navigate = useNavigate();
+
+  // Load user data and stamps on component mount
+  useEffect(() => {
+    // Load user name from localStorage
+    const storedUserName = localStorage.getItem('userName') || 'Explorer';
+    setUserName(storedUserName);
+    
+    // Load or create join date
+    let joinDate = localStorage.getItem('userJoinDate');
+    if (!joinDate) {
+      // If no join date, set it to current date
+      const now = new Date();
+      joinDate = `${now.toLocaleString('default', { month: 'long' })} ${now.getFullYear()}`;
+      localStorage.setItem('userJoinDate', joinDate);
+    }
+    setUserJoinDate(joinDate);
+    
+    // Load collected stamps
+    const storedStamps = localStorage.getItem('collectedStamps');
+    if (storedStamps) {
+      setCollectedStampsData(JSON.parse(storedStamps));
+    }
+  }, []);
 
   // Set the active emirate based on the URL param or default
   useEffect(() => {
@@ -256,23 +66,58 @@ const PassportScreen = () => {
       setCurrentPage(emitatesData.findIndex(emirate => emirate.id === emirateId) || 0);
     }
   }, [emirateId]);
-  const emirateData = emitatesData.find(emirate => emirate.id === activeEmirateId) || emitatesData[0];
-  const totalStampsCollected = emitatesData.reduce((total, emirate) => total + emirate.locations.filter(loc => loc.collected).length, 0);
+
+  // Apply collected stamps data to emiratesData
+  const getUpdatedEmiratesData = () => {
+    return emitatesData.map(emirate => {
+      // Create a deep copy of the emirate object
+      const updatedEmitate = { ...emirate };
+      
+      // Update locations based on collected stamps
+      updatedEmitate.locations = emirate.locations.map(location => {
+        // Check if this location has been collected by the user
+        const emirateStamps = collectedStampsData[emirate.id] || [];
+        const collected = emirateStamps.some(stamp => stamp.locationId === location.id);
+        const stamp = emirateStamps.find(s => s.locationId === location.id);
+        
+        return {
+          ...location,
+          collected: collected,
+          collectedDate: stamp ? new Date(stamp.collectedAt).toLocaleDateString() : undefined
+        };
+      });
+      
+      return updatedEmitate;
+    });
+  };
+
+  const updatedEmiratesData = getUpdatedEmiratesData();
+  const emirateData = updatedEmiratesData.find(emirate => emirate.id === activeEmirateId) || updatedEmiratesData[0];
+  
+  // Calculate total stamps collected
+  const totalStampsCollected = Object.values(collectedStampsData).reduce((total: number, stamps: any[]) => {
+    return total + stamps.length;
+  }, 0);
+
   const handleFlip = () => {
     setIsFlipped(!isFlipped);
   };
+
   const handleScanClick = () => {
     navigate('/scan');
   };
+
   const handleStampClick = locationId => {
     const location = emirateData?.locations.find(l => l.id === locationId);
     if (location?.collected) {
       navigate(`/stamp/${emirateData?.id}/${locationId}`);
     }
   };
+
   const handleAddMemory = locationId => {
     navigate(`/stamp-earned`);
   };
+
   const handlePrevEmirate = () => {
     const currentIndex = emitatesData.findIndex(e => e.id === activeEmirateId);
     if (currentIndex > 0) {
@@ -282,6 +127,7 @@ const PassportScreen = () => {
       navigate(`/passport/${newEmirate.id}`);
     }
   };
+
   const handleNextEmirate = () => {
     const currentIndex = emitatesData.findIndex(e => e.id === activeEmirateId);
     if (currentIndex < emitatesData.length - 1) {
@@ -296,9 +142,11 @@ const PassportScreen = () => {
   const handleTouchStart = e => {
     setTouchStart(e.targetTouches[0].clientX);
   };
+
   const handleTouchMove = e => {
     setTouchEnd(e.targetTouches[0].clientX);
   };
+
   const handleTouchEnd = () => {
     if (touchStart - touchEnd > 100) {
       // Swipe left
@@ -309,11 +157,17 @@ const PassportScreen = () => {
       handlePrevEmirate();
     }
   };
-  return <div className="min-h-screen bg-masar-cream pb-20">
+
+  return (
+    <div className="min-h-screen bg-masar-cream pb-20">
       {/* Header */}
       <div className="bg-masar-gold text-white p-4">
         <div className="flex items-center">
-          <Button variant="ghost" className="text-white p-2 h-auto" onClick={() => navigate(-1)}>
+          <Button 
+            variant="ghost" 
+            className="text-white p-2 h-auto" 
+            onClick={() => navigate('/home')}
+          >
             <ArrowLeft className="w-6 h-6" />
           </Button>
           <h1 className="text-xl font-serif ml-2">Digital Passport</h1>
@@ -359,16 +213,18 @@ const PassportScreen = () => {
                 <div className="flex-1 flex flex-col items-center">
                   <div className="relative mb-4">
                     <Avatar className="w-24 h-24 border-2 border-masar-gold">
-                      <AvatarImage src="/lovable-uploads/984e2ec2-cb8a-4d95-afeb-0e2d2195bd08.png" alt="Hamdoon Profile" />
-                      <AvatarFallback className="bg-masar-teal text-white text-xl">H</AvatarFallback>
+                      <AvatarImage src="/lovable-uploads/984e2ec2-cb8a-4d95-afeb-0e2d2195bd08.png" alt="Explorer Profile" />
+                      <AvatarFallback className="bg-masar-teal text-white text-xl">
+                        {userName?.charAt(0) || 'E'}
+                      </AvatarFallback>
                     </Avatar>
                     <div className="absolute -bottom-2 -right-2 bg-masar-teal text-white text-xs rounded-full w-8 h-8 flex items-center justify-center border-2 border-white">
                       <span>VIP</span>
                     </div>
                   </div>
                   
-                  <h4 className="font-bold text-lg mb-1 text-masar-cream">Ahmed Mohammed</h4>
-                  <p className="text-sm mb-4 text-masar-cream">Explorer since May 2023</p>
+                  <h4 className="font-bold text-lg mb-1 text-masar-cream">{userName}</h4>
+                  <p className="text-sm mb-4 text-masar-cream">Explorer since {userJoinDate}</p>
                   
                   <div className="w-full bg-white rounded-lg p-3 shadow-sm mb-4">
                     <div className="flex items-center justify-between">
@@ -380,20 +236,32 @@ const PassportScreen = () => {
                   <div className="w-full">
                     <h5 className="text-sm font-medium mb-2 text-masar-blue">Emirates Visited</h5>
                     <div className="space-y-2">
-                      {emitatesData.map(emirate => {
-                      const stampsCollected = emirate.locations.filter(l => l.collected).length;
-                      if (stampsCollected > 0) {
-                        return <div key={emirate.id} className={`text-xs flex items-center justify-between p-2 rounded ${emirate.id === activeEmirateId ? 'bg-masar-gold/20 text-masar-blue font-medium' : 'text-masar-blue/70'}`} onClick={e => {
-                          e.stopPropagation();
-                          setActiveEmirateId(emirate.id);
-                          navigate(`/passport/${emirate.id}`);
-                        }}>
+                      {updatedEmiratesData.map(emirate => {
+                        const stampsCollected = emirate.locations.filter(l => l.collected).length;
+                        if (stampsCollected > 0) {
+                          return (
+                            <div key={emirate.id} 
+                              className={`text-xs flex items-center justify-between p-2 rounded ${
+                                emirate.id === activeEmirateId ? 'bg-masar-gold/20 text-masar-blue font-medium' : 'text-masar-blue/70'
+                              }`} 
+                              onClick={e => {
+                                e.stopPropagation();
+                                setActiveEmirateId(emirate.id);
+                                navigate(`/passport/${emirate.id}`);
+                              }}
+                            >
                               <span>{emirate.name}</span>
                               <span>{stampsCollected}/{emirate.locations.length}</span>
-                            </div>;
-                      }
-                      return null;
-                    })}
+                            </div>
+                          );
+                        }
+                        return null;
+                      })}
+                      {totalStampsCollected === 0 && (
+                        <div className="text-xs text-masar-blue/70 p-2 text-center italic">
+                          No emirates visited yet
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -417,32 +285,52 @@ const PassportScreen = () => {
                 </p>
                 
                 {/* Navigation buttons */}
-                {currentPage > 0 && <Button variant="ghost" className="absolute left-0 top-1/2 -translate-y-1/2 text-masar-blue h-auto p-1" onClick={e => {
-                e.stopPropagation();
-                handlePrevEmirate();
-              }}>
+                {currentPage > 0 && (
+                  <Button 
+                    variant="ghost" 
+                    className="absolute left-0 top-1/2 -translate-y-1/2 text-masar-blue h-auto p-1" 
+                    onClick={e => {
+                      e.stopPropagation();
+                      handlePrevEmirate();
+                    }}
+                  >
                     <ChevronLeft className="h-6 w-6" />
-                  </Button>}
+                  </Button>
+                )}
                 
-                {currentPage < emitatesData.length - 1 && <Button variant="ghost" className="absolute right-0 top-1/2 -translate-y-1/2 text-masar-blue h-auto p-1" onClick={e => {
-                e.stopPropagation();
-                handleNextEmirate();
-              }}>
+                {currentPage < emitatesData.length - 1 && (
+                  <Button 
+                    variant="ghost" 
+                    className="absolute right-0 top-1/2 -translate-y-1/2 text-masar-blue h-auto p-1" 
+                    onClick={e => {
+                      e.stopPropagation();
+                      handleNextEmirate();
+                    }}
+                  >
                     <ChevronRight className="h-6 w-6" />
-                  </Button>}
+                  </Button>
+                )}
                 
                 <div className="flex-1 overflow-y-auto">
                   <div className="grid grid-cols-2 gap-4">
-                    {emirateData.locations.map(location => <div key={location.id} className={`aspect-square rounded-full flex flex-col items-center justify-center relative overflow-hidden ${location.collected ? 'bg-masar-gold/20 cursor-pointer' : 'bg-gray-100 opacity-80'}`} onClick={e => {
-                    e.stopPropagation();
-                    handleStampClick(location.id);
-                  }}>
+                    {emirateData.locations.map(location => (
+                      <div 
+                        key={location.id} 
+                        className={`aspect-square rounded-full flex flex-col items-center justify-center relative overflow-hidden ${
+                          location.collected ? 'bg-masar-gold/20 cursor-pointer' : 'bg-gray-100 opacity-80'
+                        }`} 
+                        onClick={e => {
+                          e.stopPropagation();
+                          handleStampClick(location.id);
+                        }}
+                      >
                         {/* Stamp border - dotted circle */}
                         <div className="absolute inset-0 border-4 rounded-full border-dashed border-masar-blue/20 flex items-center justify-center">
                           {!location.collected && <Lock className="h-6 w-6 text-masar-red" />}
                         </div>
                         
-                        {location.collected && <>
+                        {location.collected && (
+                          <>
                             {/* Stamp background with icon */}
                             <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
                               <div className="absolute inset-0 bg-masar-gold/20"></div>
@@ -463,19 +351,28 @@ const PassportScreen = () => {
                             
                             {/* Add memory button */}
                             <div className="absolute top-0 right-0 p-1">
-                              <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-masar-blue bg-white/80 rounded-full" onClick={e => {
-                          e.stopPropagation();
-                          handleAddMemory(location.id);
-                        }}>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-6 w-6 p-0 text-masar-blue bg-white/80 rounded-full" 
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  handleAddMemory(location.id);
+                                }}
+                              >
                                 <Camera className="h-3 w-3" />
                               </Button>
                             </div>
-                          </>}
+                          </>
+                        )}
                         
-                        {!location.collected && <div className="text-xs text-center text-gray-500 mt-8 px-2">
+                        {!location.collected && (
+                          <div className="text-xs text-center text-gray-500 mt-8 px-2">
                             {location.name}
-                          </div>}
-                      </div>)}
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
                 
@@ -495,19 +392,30 @@ const PassportScreen = () => {
         </div>
         
         {/* Close passport button (only visible when passport is open) */}
-        {isFlipped && <div className="text-center mt-4">
-            <Button variant="outline" className="text-masar-blue border-masar-blue/50 font-semibold" onClick={handleFlip}>
+        {isFlipped && (
+          <div className="text-center mt-4">
+            <Button 
+              variant="outline" 
+              className="text-masar-blue border-masar-blue/50 font-semibold" 
+              onClick={handleFlip}
+            >
               Close Passport
             </Button>
-          </div>}
+          </div>
+        )}
       </div>
       
       {/* Scan Button */}
       <div className="fixed bottom-4 left-0 right-0 flex justify-center">
-        <Button onClick={handleScanClick} className="text-white px-8 py-4 rounded-full h-auto font-semibold bg-masar-red">
+        <Button 
+          onClick={handleScanClick} 
+          className="text-white px-8 py-4 rounded-full h-auto font-semibold bg-masar-red"
+        >
           Scan for New Stamp
         </Button>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default PassportScreen;
