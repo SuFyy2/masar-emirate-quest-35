@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Camera } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Html5Qrcode } from 'html5-qrcode';
 
@@ -16,7 +16,6 @@ const getUserStorageKey = (key: string): string => {
 const ScannerScreen: React.FC = () => {
   const [scanning, setScanning] = useState<boolean>(true);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
-  const [scanResult, setScanResult] = useState<string | null>(null);
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const scannerContainerId = "qr-reader";
   const navigate = useNavigate();
@@ -80,7 +79,7 @@ const ScannerScreen: React.FC = () => {
       return;
     }
     
-    // Save the collected stamp
+    // Save the collected stamp and add points
     saveCollectedStamp(stampData);
     
     // Show success toast
@@ -96,7 +95,6 @@ const ScannerScreen: React.FC = () => {
   // Handle scan failures
   const onScanFailure = (error: any) => {
     // We can ignore errors since they happen frequently during scanning
-    // console.warn(`QR code scan error: ${error}`);
   };
   
   // Start the QR scanner
@@ -165,12 +163,11 @@ const ScannerScreen: React.FC = () => {
     navigate(-1);
   };
   
-  // Function to save the collected stamp data
+  // Function to save the collected stamp data and award points
   const saveCollectedStamp = (stampData: any) => {
     // Don't save for demo users
     const userName = localStorage.getItem('userName');
     const isDemoUser = userName === 'Demo User';
-    if (isDemoUser) return;
     
     try {
       // Set user join date if not already set
@@ -199,17 +196,29 @@ const ScannerScreen: React.FC = () => {
       );
       
       if (!alreadyCollected) {
+        // Add points for collecting a new stamp
+        const pointsToAdd = 50; // Base points for each stamp
+        
         collectedStamps[stampData.emirateId].push({
           locationId: stampData.locationId,
           name: stampData.name || `Location ${stampData.locationId}`,
-          collectedAt: new Date().toISOString()
+          collectedAt: new Date().toISOString(),
+          points: pointsToAdd
         });
         
         // Store the current stamp for reference in the earned screen
-        localStorage.setItem('currentScannedStamp', JSON.stringify(stampData));
+        localStorage.setItem('currentScannedStamp', JSON.stringify({
+          ...stampData,
+          points: pointsToAdd
+        }));
         
         // Save to localStorage with user-specific key
         localStorage.setItem(getUserStorageKey('collectedStamps'), JSON.stringify(collectedStamps));
+        
+        // Update the user's total points
+        const currentPoints = parseInt(localStorage.getItem(getUserStorageKey('userPoints')) || '0', 10);
+        const newTotalPoints = currentPoints + pointsToAdd;
+        localStorage.setItem(getUserStorageKey('userPoints'), newTotalPoints.toString());
       }
     } catch (error) {
       console.error("Error saving stamp data:", error);
@@ -298,14 +307,6 @@ const ScannerScreen: React.FC = () => {
             </p>
           </>
         )}
-        
-        {/* Sample QR Code Link */}
-        <Button 
-          onClick={() => navigate('/sample-qr')}
-          className="bg-masar-teal hover:bg-masar-teal/90 text-white mb-4"
-        >
-          View Sample QR Codes
-        </Button>
         
         {/* Demo button - normally wouldn't be in production app */}
         <Button 

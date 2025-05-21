@@ -3,19 +3,20 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 // Helper function to get user-specific storage key
 const getUserStorageKey = (key: string, userEmail: string): string => {
   return `${userEmail}_${key}`;
 };
 
-const AuthScreen = () => {
+const AuthScreen: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const navigate = useNavigate();
+  const { toast } = useToast();
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,6 +39,15 @@ const AuthScreen = () => {
         toast({
           title: "Account not found",
           description: "Please sign up first",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      if (foundUser.password !== password) {
+        toast({
+          title: "Invalid password",
+          description: "Please check your password and try again",
           variant: "destructive"
         });
         return;
@@ -86,8 +96,10 @@ const AuthScreen = () => {
       localStorage.setItem('currentUserEmail', email);
       localStorage.setItem('userName', name);
       
-      // Initialize user join date
+      // Initialize user data
       localStorage.setItem(getUserStorageKey('userJoinDate', email), joinDate);
+      localStorage.setItem(getUserStorageKey('userPoints', email), '0');
+      localStorage.setItem(getUserStorageKey('collectedStamps', email), '{}');
       
       toast({
         title: "Account created!",
@@ -99,7 +111,29 @@ const AuthScreen = () => {
     }
   };
 
-  return <div className="min-h-screen flex flex-col bg-masar-cream">
+  const handleDemoLogin = () => {
+    // For demo purposes, skip login
+    localStorage.setItem('isAuthenticated', 'true');
+    localStorage.setItem('userName', 'Demo User');
+    localStorage.setItem('currentUserEmail', 'demo@example.com');
+    
+    // Reset progress tracking for demo user
+    localStorage.removeItem('hasViewedHomeScreen');
+    localStorage.removeItem('hasViewedProfileBefore');
+    localStorage.setItem('demo@example.com_userPoints', '0');
+    localStorage.setItem('demo@example.com_collectedStamps', '{}');
+    
+    toast({
+      title: "Welcome, Demo User!",
+      description: "You're using a demo account with no progress"
+    });
+    
+    // Navigate with a slight delay to ensure localStorage is updated
+    setTimeout(() => navigate('/home'), 100);
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col bg-masar-cream">
       <div className="flex-1 flex flex-col justify-center items-center px-8 pt-8">
         <div className="mb-8 animate-fade-in">
           <img alt="Masar Logo" className="w-40 h-auto" src="/lovable-uploads/e30f278e-11ed-4334-a4ec-e8f6bc9f837e.png" />
@@ -111,47 +145,62 @@ const AuthScreen = () => {
           </h1>
           
           <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && <div>
-                <Input type="text" placeholder="Your Name" value={name} onChange={e => setName(e.target.value)} className="bg-white border-masar-mint focus:border-masar-teal rounded-xl py-6" />
-              </div>}
+            {!isLogin && (
+              <div>
+                <Input 
+                  type="text" 
+                  placeholder="Your Name" 
+                  value={name} 
+                  onChange={e => setName(e.target.value)} 
+                  className="bg-white border-masar-mint focus:border-masar-teal rounded-xl py-6" 
+                />
+              </div>
+            )}
             
             <div>
-              <Input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} className="bg-white border-masar-mint focus:border-masar-teal rounded-xl py-6" />
+              <Input 
+                type="email" 
+                placeholder="Email" 
+                value={email} 
+                onChange={e => setEmail(e.target.value)} 
+                className="bg-white border-masar-mint focus:border-masar-teal rounded-xl py-6" 
+              />
             </div>
             
             <div>
-              <Input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} className="bg-white border-masar-mint focus:border-masar-teal rounded-xl py-6" />
+              <Input 
+                type="password" 
+                placeholder="Password" 
+                value={password} 
+                onChange={e => setPassword(e.target.value)} 
+                className="bg-white border-masar-mint focus:border-masar-teal rounded-xl py-6" 
+              />
             </div>
             
-            <Button type="submit" className="w-full bg-masar-teal hover:bg-masar-teal/90 text-white rounded-xl py-6 h-auto font-medium text-lg">
+            <Button 
+              type="submit" 
+              className="w-full bg-masar-teal hover:bg-masar-teal/90 text-white rounded-xl py-6 h-auto font-medium text-lg"
+            >
               {isLogin ? 'Log In' : 'Sign Up'}
             </Button>
           </form>
           
           <div className="mt-6 text-center">
-            <Button variant="link" onClick={() => setIsLogin(!isLogin)} className="text-masar-teal hover:text-masar-teal/80">
+            <Button 
+              variant="link" 
+              onClick={() => setIsLogin(!isLogin)} 
+              className="text-masar-teal hover:text-masar-teal/80"
+            >
               {isLogin ? "Don't have an account? Sign up" : "Already have an account? Log in"}
             </Button>
           </div>
 
           <div className="mt-4 text-center">
-            <Button variant="link" onClick={() => {
-            // For demo purposes, skip login
-            localStorage.setItem('isAuthenticated', 'true');
-            localStorage.setItem('userName', 'Demo User');
-            
-            // Reset progress tracking for demo user
-            localStorage.removeItem('hasViewedHomeScreen');
-            localStorage.removeItem('hasViewedProfileBefore');
-            
-            toast({
-              title: "Welcome, Demo User!",
-              description: "You're using a demo account with no progress"
-            });
-            
-            // Navigate with a slight delay to ensure localStorage is updated
-            setTimeout(() => navigate('/home'), 100);
-          }} className="text-masar-gold hover:text-masar-gold/80">
+            <Button 
+              variant="link" 
+              onClick={handleDemoLogin} 
+              className="text-masar-gold hover:text-masar-gold/80"
+            >
               Continue as Demo User
             </Button>
           </div>
@@ -166,6 +215,8 @@ const AuthScreen = () => {
           </p>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default AuthScreen;

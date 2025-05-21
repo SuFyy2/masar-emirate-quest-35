@@ -12,7 +12,8 @@ const defaultStampData = {
   name: 'Dubai Mall',
   emirateName: 'Dubai',
   description: 'Home to over 1,200 retail outlets and 200 food & beverage outlets, Dubai Mall is one of the world\'s largest shopping destinations.',
-  icon: '🛍️'
+  icon: '🛍️',
+  points: 50
 };
 
 // Helper function to get user-specific storage key
@@ -38,7 +39,7 @@ const createConfetti = (container: HTMLDivElement) => {
   }
 };
 
-const StampEarnedScreen = () => {
+const StampEarnedScreen: React.FC = () => {
   const [showAddMemory, setShowAddMemory] = useState(false);
   const [note, setNote] = useState('');
   const [stampData, setStampData] = useState(defaultStampData);
@@ -99,6 +100,9 @@ const StampEarnedScreen = () => {
     navigate('/passport');
   };
 
+  // Get the user's total points
+  const totalPoints = parseInt(localStorage.getItem(getUserStorageKey('userPoints')) || '0', 10);
+
   return (
     <div className="min-h-screen bg-masar-cream flex flex-col">
       {/* Confetti container */}
@@ -115,11 +119,16 @@ const StampEarnedScreen = () => {
               You earned a new explorer stamp!
             </h1>
             
-            <p className="text-center text-masar-teal/80 mb-8 animate-fade-in">
+            <p className="text-center text-masar-teal/80 mb-4 animate-fade-in">
               Congratulations on visiting the {stampData.name}! This stamp has been added to your digital passport.
             </p>
             
-            <div className="w-full max-w-sm bg-white rounded-xl p-5 shadow-md mb-8 animate-zoom-in">
+            {/* Points earned badge */}
+            <div className="bg-masar-gold text-white font-bold text-xl py-2 px-6 rounded-full mb-6 animate-pulse">
+              +{stampData.points} points
+            </div>
+            
+            <div className="w-full max-w-sm bg-white rounded-xl p-5 shadow-md mb-6 animate-zoom-in">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="font-bold text-masar-teal">{stampData.name}</h3>
@@ -132,6 +141,12 @@ const StampEarnedScreen = () => {
               
               <div className="text-sm text-masar-teal/80">
                 <p>{stampData.description}</p>
+              </div>
+              
+              <div className="mt-4 pt-3 border-t border-masar-teal/10">
+                <p className="text-sm font-medium text-center text-masar-teal">
+                  Total Explorer Points: {totalPoints}
+                </p>
               </div>
             </div>
           </div>

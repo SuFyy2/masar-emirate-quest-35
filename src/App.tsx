@@ -13,7 +13,6 @@ import ProfileScreen from './components/ProfileScreen';
 import ScannerScreen from './components/ScannerScreen';
 import StampEarnedScreen from './components/StampEarnedScreen';
 import StampDetailScreen from './components/StampDetailScreen';
-import SampleQRCode from './components/SampleQRCode';
 import { Toaster } from './components/ui/toaster';
 
 function App() {
@@ -49,7 +48,6 @@ function App() {
           <Route path="/profile" element={<ProfileScreen />} />
           <Route path="/scan" element={<ScannerScreen />} />
           <Route path="/stamp-earned" element={<StampEarnedScreen />} />
-          <Route path="/sample-qr" element={<SampleQRCode />} />
         </Routes>
         <Toaster />
       </div>

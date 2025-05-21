@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Map, Compass, User } from 'lucide-react';
+import { Map, Compass, User, Award } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Progress } from "@/components/ui/progress";
 
@@ -61,13 +62,14 @@ const emitatesData = [
 
 const tips = ["Visit Al Ain Zoo in Abu Dhabi for a special stamp!", "Scan QR codes at the Dubai Museum for exclusive stamps.", "Don't forget to explore the Heart of Sharjah for unique stamps!"];
 
-const HomeScreen = () => {
+const HomeScreen: React.FC = () => {
   const [activeEmirateIndex, setActiveEmirateIndex] = useState(0);
   const [currentTip, setCurrentTip] = useState(0);
   const navigate = useNavigate();
   const [userData, setUserData] = useState({
     isNewUser: false,
     isDemoUser: false,
+    points: 0
   });
   
   // State to store the calculated emirate data with actual collected stamps
@@ -79,6 +81,7 @@ const HomeScreen = () => {
     const userName = localStorage.getItem('userName');
     const isNewUser = !localStorage.getItem('hasViewedHomeScreen');
     const isDemoUser = userName === 'Demo User';
+    const userPoints = parseInt(localStorage.getItem(getUserStorageKey('userPoints')) || '0', 10);
     
     if (isNewUser) {
       // Mark that user has seen the home screen
@@ -87,7 +90,8 @@ const HomeScreen = () => {
     
     setUserData({
       isNewUser,
-      isDemoUser
+      isDemoUser,
+      points: userPoints
     });
     
     // Load stamps data from localStorage for non-demo users
@@ -167,17 +171,25 @@ const HomeScreen = () => {
     navigate('/scan');
   };
 
-  return <div className="min-h-screen bg-masar-cream pb-20">
+  return (
+    <div className="min-h-screen bg-masar-cream pb-20">
       {/* Header */}
       <div className="bg-masar-blue text-white p-6 rounded-b-2xl">
         <div className="flex justify-between items-center">
           <img alt="Masar Logo" src="/lovable-uploads/7df6787e-769a-4712-aabe-7322b3d7144b.png" className="h-8 object-fill" />
-          <div className="flex items-center space-x-2">
-            <span className="text-sm font-medium">
-              {totalCollectedStamps}/{totalStamps} Stamps
-            </span>
-            <div className="w-8 h-8 bg-masar-gold/20 rounded-full flex items-center justify-center">
-              <Compass className="w-5 h-5 text-masar-gold" />
+          <div className="flex items-center space-x-4">
+            {/* Points display */}
+            <div className="bg-masar-gold/20 text-masar-gold rounded-full px-3 py-1 flex items-center">
+              <Award className="w-4 h-4 mr-1" />
+              <span className="font-medium">{userData.points} pts</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm font-medium">
+                {totalCollectedStamps}/{totalStamps} Stamps
+              </span>
+              <div className="w-8 h-8 bg-masar-gold/20 rounded-full flex items-center justify-center">
+                <Compass className="w-5 h-5 text-masar-gold" />
+              </div>
             </div>
           </div>
         </div>
@@ -228,7 +240,8 @@ const HomeScreen = () => {
         <h2 className="text-xl font-serif font-bold text-masar-blue mb-3">Explore Emirates</h2>
         <div className="overflow-x-auto pb-4">
           <div className="flex space-x-4">
-            {calculatedEmirateData.map((emirate, index) => <Card key={emirate.id} className="flex-shrink-0 w-64 overflow-hidden" onClick={() => setActiveEmirateIndex(index)}>
+            {calculatedEmirateData.map((emirate, index) => (
+              <Card key={emirate.id} className="flex-shrink-0 w-64 overflow-hidden" onClick={() => setActiveEmirateIndex(index)}>
                 <div className="relative h-36">
                   <img src={emirate.image} alt={emirate.name} className="absolute inset-0 w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-3">
@@ -236,7 +249,12 @@ const HomeScreen = () => {
                       <h3 className="text-white font-bold">{emirate.name}</h3>
                       <div className="flex items-center mt-1">
                         <div className="flex space-x-1">
-                          {[...Array(emirate.stampCount)].map((_, i) => <div key={i} className={`w-3 h-3 rounded-full ${(userData.isNewUser || userData.isDemoUser) ? 'bg-white/30' : (i < emirate.collectedStamps ? 'bg-masar-gold' : 'bg-white/30')}`} />)}
+                          {[...Array(emirate.stampCount)].map((_, i) => (
+                            <div 
+                              key={i} 
+                              className={`w-3 h-3 rounded-full ${(userData.isNewUser || userData.isDemoUser) ? 'bg-white/30' : (i < emirate.collectedStamps ? 'bg-masar-gold' : 'bg-white/30')}`} 
+                            />
+                          ))}
                         </div>
                         <span className="ml-2 text-xs text-white">
                           {userData.isNewUser || userData.isDemoUser ? 0 : emirate.collectedStamps}/{emirate.stampCount}
@@ -246,14 +264,18 @@ const HomeScreen = () => {
                   </div>
                 </div>
                 <div className="p-3 bg-white">
-                  <Button onClick={e => {
-                e.stopPropagation();
-                navigate(`/passport/${emirate.id}`);
-              }} className="w-full bg-masar-mint hover:bg-masar-mint/90 text-masar-red">
+                  <Button 
+                    onClick={e => {
+                      e.stopPropagation();
+                      navigate(`/passport/${emirate.id}`);
+                    }} 
+                    className="w-full bg-masar-mint hover:bg-masar-mint/90 text-masar-red"
+                  >
                     View Stamps
                   </Button>
                 </div>
-              </Card>)}
+              </Card>
+            ))}
           </div>
         </div>
       </div>
@@ -277,6 +299,8 @@ const HomeScreen = () => {
           </Button>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default HomeScreen;
