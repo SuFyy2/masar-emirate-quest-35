@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -74,7 +73,8 @@ const HomeScreen = () => {
   // State to store the calculated emirate data with actual collected stamps
   const [calculatedEmirateData, setCalculatedEmirateData] = useState(emitatesData);
   
-  useEffect(() => {
+  // Load user data and stamp information
+  const loadUserData = () => {
     // Check if user is demo user or new user
     const userName = localStorage.getItem('userName');
     const isNewUser = !localStorage.getItem('hasViewedHomeScreen');
@@ -107,8 +107,20 @@ const HomeScreen = () => {
         });
         
         setCalculatedEmirateData(updatedEmirateData);
+      } else {
+        // If no stored stamps, reset to default
+        setCalculatedEmirateData(emitatesData);
       }
+    } else {
+      // Reset for demo users
+      setCalculatedEmirateData(emitatesData);
     }
+  };
+
+  // Initial load and setup tip rotation
+  useEffect(() => {
+    // Load user data and stamps
+    loadUserData();
     
     // Rotate tips every 6 seconds
     const tipInterval = setInterval(() => {
@@ -118,8 +130,28 @@ const HomeScreen = () => {
     return () => clearInterval(tipInterval);
   }, []);
   
+  // Listen for focus/visibility changes to refresh data
+  useEffect(() => {
+    // Function to reload data when tab becomes visible again
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadUserData();
+      }
+    };
+    
+    // Listen for visibility change events (user switching tabs and coming back)
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Also refresh on window focus (user coming back to the app)
+    window.addEventListener('focus', loadUserData);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', loadUserData);
+    };
+  }, []);
+  
   // Calculate total stamps based on the actual collected stamps data
-  // Show 0% for new users and demo users
   const totalCollectedStamps = userData.isNewUser || userData.isDemoUser ? 0 : 
     calculatedEmirateData.reduce((sum, emirate) => sum + emirate.collectedStamps, 0);
   const totalStamps = calculatedEmirateData.reduce((sum, emirate) => sum + emirate.stampCount, 0);

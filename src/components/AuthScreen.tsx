@@ -53,7 +53,8 @@ const AuthScreen = () => {
         description: "Welcome back to Masar"
       });
       
-      navigate('/home');
+      // Navigate with a slight delay to ensure localStorage is updated
+      setTimeout(() => navigate('/home'), 100);
     } else {
       // This is a sign up
       const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
@@ -93,7 +94,8 @@ const AuthScreen = () => {
         description: "Welcome to Masar"
       });
       
-      navigate('/home');
+      // Navigate with a slight delay to ensure localStorage is updated
+      setTimeout(() => navigate('/home'), 100);
     }
   };
 
@@ -147,7 +149,8 @@ const AuthScreen = () => {
               description: "You're using a demo account with no progress"
             });
             
-            navigate('/home');
+            // Navigate with a slight delay to ensure localStorage is updated
+            setTimeout(() => navigate('/home'), 100);
           }} className="text-masar-gold hover:text-masar-gold/80">
               Continue as Demo User
             </Button>
