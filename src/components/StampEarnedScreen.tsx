@@ -199,7 +199,8 @@ const StampEarnedScreen = () => {
         </>
       )}
       
-      <style jsx>{`
+      <style>
+        {`
         .confetti-container {
           position: fixed;
           top: 0;
@@ -258,7 +259,8 @@ const StampEarnedScreen = () => {
         .animate-fade-in {
           animation: fade-in 0.8s ease-out forwards;
         }
-      `}</style>
+        `}
+      </style>
     </div>
   );
 };
