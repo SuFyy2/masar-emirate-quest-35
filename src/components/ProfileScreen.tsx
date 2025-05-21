@@ -9,42 +9,44 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 
-const emitatesData = [{
-  id: 'abu-dhabi',
-  name: 'Abu Dhabi',
-  collected: 2,
-  total: 5
-}, {
-  id: 'dubai',
-  name: 'Dubai',
-  collected: 3,
-  total: 5
-}, {
-  id: 'sharjah',
-  name: 'Sharjah',
-  collected: 0,
-  total: 5
-}, {
-  id: 'ajman',
-  name: 'Ajman',
-  collected: 1,
-  total: 5
-}, {
-  id: 'umm-al-quwain',
-  name: 'Umm Al Quwain',
-  collected: 0,
-  total: 5
-}, {
-  id: 'fujairah',
-  name: 'Fujairah',
-  collected: 0,
-  total: 5
-}, {
-  id: 'ras-al-khaimah',
-  name: 'Ras Al Khaimah',
-  collected: 0,
-  total: 5
-}];
+const emitatesData = [
+  {
+    id: 'abu-dhabi',
+    name: 'Abu Dhabi',
+    collected: 2,
+    total: 5
+  }, {
+    id: 'dubai',
+    name: 'Dubai',
+    collected: 3,
+    total: 5
+  }, {
+    id: 'sharjah',
+    name: 'Sharjah',
+    collected: 0,
+    total: 5
+  }, {
+    id: 'ajman',
+    name: 'Ajman',
+    collected: 1,
+    total: 5
+  }, {
+    id: 'umm-al-quwain',
+    name: 'Umm Al Quwain',
+    collected: 0,
+    total: 5
+  }, {
+    id: 'fujairah',
+    name: 'Fujairah',
+    collected: 0,
+    total: 5
+  }, {
+    id: 'ras-al-khaimah',
+    name: 'Ras Al Khaimah',
+    collected: 0,
+    total: 5
+  }
+];
 
 // User profile default values
 const defaultUserProfile = {
@@ -77,6 +79,14 @@ const ProfileScreen = () => {
   const [stampsCollected, setStampsCollected] = useState({});
   
   useEffect(() => {
+    // Check if user is authenticated
+    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+    if (!isAuthenticated) {
+      // Not logged in, redirect to auth screen
+      navigate('/auth');
+      return;
+    }
+    
     // Get the current username from localStorage whenever component mounts
     const storedUserName = localStorage.getItem('userName');
     if (storedUserName) {
@@ -115,7 +125,7 @@ const ProfileScreen = () => {
     if (storedStamps && !isDemoUser && !isNewOrDemoUser) {
       setStampsCollected(JSON.parse(storedStamps));
     }
-  }, [isDemoUser]);
+  }, [isDemoUser, navigate]);
 
   // Calculate collected stamps based on the stored data or use 0 for new/demo users
   const calculateEmiratesProgress = () => {
@@ -153,14 +163,15 @@ const ProfileScreen = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('userName');
-    localStorage.removeItem('hasViewedHomeScreen');
-    localStorage.removeItem(getUserStorageKey('hasViewedProfileBefore'));
-    navigate('/login');
+    toast({
+      title: "Logged out successfully",
+      description: "See you again soon!"
+    });
+    navigate('/auth');
   };
   
   const handleLogin = () => {
-    navigate('/login');
+    navigate('/auth');
   };
   
   const toggleEditMode = () => {
@@ -340,7 +351,8 @@ const ProfileScreen = () => {
         {/* Progress By Emirate */}
         <h3 className="text-lg font-bold mb-3 text-masar-gold">Progress by Emirate</h3>
         <div className="space-y-4 mb-8">
-          {emiratesWithProgress.map(emirate => <div key={emirate.id} className="rounded-lg p-4 shadow-sm bg-masar-cream">
+          {emiratesWithProgress.map(emirate => (
+            <div key={emirate.id} className="rounded-lg p-4 shadow-sm bg-masar-cream">
               <div className="flex justify-between items-center mb-2">
                 <h4 className="font-medium text-masar-blue">{emirate.name}</h4>
                 <span className="text-sm text-masar-gold">
@@ -348,7 +360,8 @@ const ProfileScreen = () => {
                 </span>
               </div>
               <Progress value={emirate.collected / emirate.total * 100} className="h-2" />
-            </div>)}
+            </div>
+          ))}
         </div>
         
         {/* Show Login button for demo users, Logout button for regular users */}

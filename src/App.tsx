@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css'
 
 // Import components
@@ -41,6 +41,7 @@ function App() {
           <Route path="/" element={showSplash ? <SplashScreen onComplete={handleSplashComplete} /> : <HomeScreen />} />
           <Route path="/onboarding" element={<OnboardingScreen />} />
           <Route path="/auth" element={<AuthScreen />} />
+          <Route path="/login" element={<Navigate to="/auth" replace />} /> {/* Redirect /login to /auth */}
           <Route path="/home" element={<HomeScreen />} />
           <Route path="/passport" element={<PassportScreen />} />
           <Route path="/passport/:emirateId" element={<PassportScreen />} />

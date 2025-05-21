@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -21,37 +20,43 @@ const emitatesData = [
     image: 'https://images.unsplash.com/photo-1466442929976-97f336a657be?auto=format&fit=crop&w=800&q=80',
     stampCount: 5,
     collectedStamps: 0
-  }, {
+  }, 
+  {
     id: 'dubai',
     name: 'Dubai',
     image: 'https://images.unsplash.com/photo-1469041797191-50ace28483c3?auto=format&fit=crop&w=800&q=80',
     stampCount: 5,
     collectedStamps: 0
-  }, {
+  }, 
+  {
     id: 'sharjah',
     name: 'Sharjah',
     image: 'https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=800&q=80',
     stampCount: 5,
     collectedStamps: 0
-  }, {
+  }, 
+  {
     id: 'ajman',
     name: 'Ajman',
     image: 'https://images.unsplash.com/photo-1482938289607-e9573fc25ebb?auto=format&fit=crop&w=800&q=80',
     stampCount: 5,
     collectedStamps: 0
-  }, {
+  }, 
+  {
     id: 'umm-al-quwain',
     name: 'Umm Al Quwain',
     image: 'https://images.unsplash.com/photo-1466442929976-97f336a657be?auto=format&fit=crop&w=800&q=80',
     stampCount: 5,
     collectedStamps: 0
-  }, {
+  }, 
+  {
     id: 'fujairah',
     name: 'Fujairah',
     image: 'https://images.unsplash.com/photo-1482938289607-e9573fc25ebb?auto=format&fit=crop&w=800&q=80',
     stampCount: 5,
     collectedStamps: 0
-  }, {
+  }, 
+  {
     id: 'ras-al-khaimah',
     name: 'Ras Al Khaimah',
     image: 'https://images.unsplash.com/photo-1469041797191-50ace28483c3?auto=format&fit=crop&w=800&q=80',
@@ -77,6 +82,14 @@ const HomeScreen: React.FC = () => {
   
   // Load user data and stamp information
   const loadUserData = () => {
+    // Check if user is authenticated
+    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+    if (!isAuthenticated) {
+      // Not logged in, redirect to auth screen
+      navigate('/auth');
+      return;
+    }
+    
     // Check if user is demo user or new user
     const userName = localStorage.getItem('userName');
     const isNewUser = !localStorage.getItem('hasViewedHomeScreen');
