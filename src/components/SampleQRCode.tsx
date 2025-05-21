@@ -33,7 +33,7 @@ const sampleStampData = [
   }
 ];
 
-const SampleQRCode = () => {
+const SampleQRCode: React.FC = () => {
   const canvasRefs = useRef<(HTMLCanvasElement | null)[]>([]);
   const navigate = useNavigate();
   
@@ -89,7 +89,7 @@ const SampleQRCode = () => {
             
             <div className="flex justify-center mb-4">
               <canvas 
-                ref={el => canvasRefs.current[index] = el} 
+                ref={(el) => canvasRefs.current[index] = el} 
                 className="border-2 border-masar-teal/20 rounded-lg"
               />
             </div>
