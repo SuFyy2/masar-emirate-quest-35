@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -299,10 +298,18 @@ const ScannerScreen = () => {
           </>
         )}
         
+        {/* Sample QR Code Link */}
+        <Button 
+          onClick={() => navigate('/sample-qr')}
+          className="bg-masar-teal hover:bg-masar-teal/90 text-white mb-4"
+        >
+          View Sample QR Codes
+        </Button>
+        
         {/* Demo button - normally wouldn't be in production app */}
         <Button 
           onClick={triggerDemoScan}
-          className="bg-masar-teal hover:bg-masar-teal/90 text-white"
+          className="bg-masar-teal/50 hover:bg-masar-teal/70 text-white"
         >
           Demo: Simulate Successful Scan
         </Button>

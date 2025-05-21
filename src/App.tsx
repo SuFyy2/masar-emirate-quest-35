@@ -1,90 +1,60 @@
+import { useState, useEffect } from 'react'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import './App.css'
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+// Import components
+import SplashScreen from './components/SplashScreen';
+import OnboardingScreen from './components/OnboardingScreen';
+import AuthScreen from './components/AuthScreen';
+import HomeScreen from './components/HomeScreen';
+import PassportScreen from './components/PassportScreen';
+import ProfileScreen from './components/ProfileScreen';
+import ScannerScreen from './components/ScannerScreen';
+import StampEarnedScreen from './components/StampEarnedScreen';
+import StampDetailScreen from './components/StampDetailScreen';
+import SampleQRCode from './components/SampleQRCode';
+import { useToast } from './hooks/use-toast';
+import { Toaster } from './components/ui/toaster';
 
-// Import our screens
-import SplashScreen from "./components/SplashScreen";
-import OnboardingScreen from "./components/OnboardingScreen";
-import AuthScreen from "./components/AuthScreen";
-import HomeScreen from "./components/HomeScreen";
-import PassportScreen from "./components/PassportScreen";
-import ScannerScreen from "./components/ScannerScreen";
-import StampEarnedScreen from "./components/StampEarnedScreen";
-import ProfileScreen from "./components/ProfileScreen";
-import StampDetailScreen from "./components/StampDetailScreen";
-import NotFound from "./pages/NotFound";
+function App() {
+  const [showSplash, setShowSplash] = useState(true);
+  const [isDemoMode, setIsDemoMode] = useState(false);
 
-// Authentication guard component
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+  useEffect(() => {
+    // Check if the user is in demo mode
+    const userName = localStorage.getItem('userName');
+    setIsDemoMode(userName === 'Demo User');
+
+    // Set a default user email if none exists
+    if (!localStorage.getItem('currentUserEmail')) {
+      localStorage.setItem('currentUserEmail', 'default@example.com');
+    }
+  }, []);
+
+  const handleSplashComplete = () => {
+    setShowSplash(false);
+  };
   
-  if (!isAuthenticated) {
-    return <Navigate to="/login" />;
-  }
-  
-  return <>{children}</>;
-};
-
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
+  return (
+    <Router>
+      <div className="App">
         <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<SplashScreen />} />
+          <Route path="/" element={showSplash ? <SplashScreen onComplete={handleSplashComplete} /> : <HomeScreen />} />
           <Route path="/onboarding" element={<OnboardingScreen />} />
-          <Route path="/login" element={<AuthScreen />} />
-          
-          {/* Protected routes */}
-          <Route path="/home" element={
-            <ProtectedRoute>
-              <HomeScreen />
-            </ProtectedRoute>
-          } />
-          <Route path="/passport" element={
-            <ProtectedRoute>
-              <PassportScreen />
-            </ProtectedRoute>
-          } />
-          <Route path="/passport/:emirateId" element={
-            <ProtectedRoute>
-              <PassportScreen />
-            </ProtectedRoute>
-          } />
-          <Route path="/scan" element={
-            <ProtectedRoute>
-              <ScannerScreen />
-            </ProtectedRoute>
-          } />
-          <Route path="/stamp-earned" element={
-            <ProtectedRoute>
-              <StampEarnedScreen />
-            </ProtectedRoute>
-          } />
-          <Route path="/profile" element={
-            <ProtectedRoute>
-              <ProfileScreen />
-            </ProtectedRoute>
-          } />
-          <Route path="/stamp/:emirateId/:stampId" element={
-            <ProtectedRoute>
-              <StampDetailScreen />
-            </ProtectedRoute>
-          } />
-          
-          {/* Catch-all route */}
-          <Route path="*" element={<NotFound />} />
+          <Route path="/auth" element={<AuthScreen />} />
+          <Route path="/home" element={<HomeScreen />} />
+          <Route path="/passport" element={<PassportScreen />} />
+          <Route path="/passport/:emirateId" element={<PassportScreen />} />
+          <Route path="/stamp/:emirateId/:stampId" element={<StampDetailScreen />} />
+          <Route path="/profile" element={<ProfileScreen />} />
+          <Route path="/scan" element={<ScannerScreen />} />
+          <Route path="/stamp-earned" element={<StampEarnedScreen />} />
+          <Route path="/sample-qr" element={<SampleQRCode />} />
         </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+        <Toaster />
+      </div>
+    </Router>
+  )
+}
 
-export default App;
+export default App
