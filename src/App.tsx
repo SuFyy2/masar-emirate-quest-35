@@ -14,7 +14,6 @@ import ScannerScreen from './components/ScannerScreen';
 import StampEarnedScreen from './components/StampEarnedScreen';
 import StampDetailScreen from './components/StampDetailScreen';
 import SampleQRCode from './components/SampleQRCode';
-import { useToast } from './hooks/use-toast';
 import { Toaster } from './components/ui/toaster';
 
 function App() {

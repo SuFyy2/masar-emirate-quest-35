@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Camera } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Html5Qrcode } from 'html5-qrcode';
 
@@ -12,8 +13,8 @@ const getUserStorageKey = (key: string): string => {
   return `${currentUserEmail}_${key}`;
 };
 
-const ScannerScreen = () => {
-  const [scanning, setScanning] = useState(true);
+const ScannerScreen: React.FC = () => {
+  const [scanning, setScanning] = useState<boolean>(true);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanResult, setScanResult] = useState<string | null>(null);
   const scannerRef = useRef<Html5Qrcode | null>(null);
@@ -165,7 +166,7 @@ const ScannerScreen = () => {
   };
   
   // Function to save the collected stamp data
-  const saveCollectedStamp = (stampData) => {
+  const saveCollectedStamp = (stampData: any) => {
     // Don't save for demo users
     const userName = localStorage.getItem('userName');
     const isDemoUser = userName === 'Demo User';
@@ -181,7 +182,7 @@ const ScannerScreen = () => {
       
       // Get existing stamps from localStorage
       const existingStampsString = localStorage.getItem(getUserStorageKey('collectedStamps'));
-      let collectedStamps = {};
+      let collectedStamps: Record<string, any[]> = {};
       
       if (existingStampsString) {
         collectedStamps = JSON.parse(existingStampsString);
