@@ -1,11 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Camera, ArrowLeft } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 
-// Simulated stamp data - normally this would come from the scanned QR code
-const stampData = {
+// Default stamp data (fallback)
+const defaultStampData = {
   emirateId: 'dubai',
   locationId: 2,
   name: 'Dubai Mall',
@@ -40,6 +41,7 @@ const createConfetti = (container: HTMLDivElement) => {
 const StampEarnedScreen = () => {
   const [showAddMemory, setShowAddMemory] = useState(false);
   const [note, setNote] = useState('');
+  const [stampData, setStampData] = useState(defaultStampData);
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -47,13 +49,27 @@ const StampEarnedScreen = () => {
   const confettiContainerRef = React.useRef<HTMLDivElement>(null);
   
   useEffect(() => {
+    // Try to load scanned stamp data from localStorage
+    try {
+      const scannedStampString = localStorage.getItem('currentScannedStamp');
+      if (scannedStampString) {
+        const scannedStamp = JSON.parse(scannedStampString);
+        setStampData({
+          ...defaultStampData,
+          ...scannedStamp
+        });
+        
+        // Clear the current scanned stamp
+        localStorage.removeItem('currentScannedStamp');
+      }
+    } catch (error) {
+      console.error("Error loading scanned stamp data:", error);
+    }
+    
     // Create confetti when component mounts
     if (confettiContainerRef.current) {
       createConfetti(confettiContainerRef.current);
     }
-    
-    // Save the stamp data when stamp is earned
-    saveStampData();
     
     // Clean up confetti when component unmounts
     return () => {
@@ -62,48 +78,6 @@ const StampEarnedScreen = () => {
       }
     };
   }, []);
-  
-  // Function to save the stamp data to localStorage
-  const saveStampData = () => {
-    // Don't save data for demo users
-    const userName = localStorage.getItem('userName');
-    const isDemoUser = userName === 'Demo User';
-    if (isDemoUser) return;
-    
-    try {
-      // Get existing stamps data or initialize
-      const existingStampsString = localStorage.getItem(getUserStorageKey('collectedStamps'));
-      let collectedStamps = {};
-      
-      if (existingStampsString) {
-        collectedStamps = JSON.parse(existingStampsString);
-      }
-      
-      // Initialize emirate array if needed
-      if (!collectedStamps[stampData.emirateId]) {
-        collectedStamps[stampData.emirateId] = [];
-      }
-      
-      // Check if this stamp is already collected
-      const alreadyCollected = collectedStamps[stampData.emirateId].some(
-        stamp => stamp.locationId === stampData.locationId
-      );
-      
-      if (!alreadyCollected) {
-        // Add the stamp to the collection
-        collectedStamps[stampData.emirateId].push({
-          locationId: stampData.locationId,
-          name: stampData.name,
-          collectedAt: new Date().toISOString()
-        });
-        
-        // Save to localStorage with user-specific key
-        localStorage.setItem(getUserStorageKey('collectedStamps'), JSON.stringify(collectedStamps));
-      }
-    } catch (error) {
-      console.error("Error saving stamp data:", error);
-    }
-  };
   
   const handleViewPassport = () => {
     navigate('/passport');
@@ -224,6 +198,67 @@ const StampEarnedScreen = () => {
           </div>
         </>
       )}
+      
+      <style jsx>{`
+        .confetti-container {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          z-index: 100;
+          overflow: hidden;
+        }
+        
+        .confetti {
+          position: absolute;
+          width: 10px;
+          height: 10px;
+          opacity: 0.7;
+        }
+        
+        @keyframes confetti-fall {
+          0% {
+            transform: translateY(-100vh) rotate(0deg);
+          }
+          100% {
+            transform: translateY(100vh) rotate(720deg);
+          }
+        }
+        
+        .animate-confetti {
+          animation: confetti-fall 3s linear forwards;
+        }
+        
+        @keyframes zoom-in {
+          from {
+            opacity: 0;
+            transform: scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        
+        .animate-zoom-in {
+          animation: zoom-in 0.5s ease-out forwards;
+        }
+        
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+        
+        .animate-fade-in {
+          animation: fade-in 0.8s ease-out forwards;
+        }
+      `}</style>
     </div>
   );
 };

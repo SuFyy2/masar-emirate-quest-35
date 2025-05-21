@@ -1,17 +1,10 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Camera } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-
-// Simulated data for demo purposes - normally would come from the QR code
-const demoStampData = {
-  emirateId: 'dubai',
-  locationId: 2, // Updated to Dubai Mall to match StampEarnedScreen.tsx
-  name: 'Dubai Mall',
-  timestamp: new Date().toISOString()
-};
+import { Html5Qrcode } from 'html5-qrcode';
 
 // Helper function to get user-specific storage key
 const getUserStorageKey = (key: string): string => {
@@ -22,22 +15,152 @@ const getUserStorageKey = (key: string): string => {
 
 const ScannerScreen = () => {
   const [scanning, setScanning] = useState(true);
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const [scanResult, setScanResult] = useState<string | null>(null);
+  const scannerRef = useRef<Html5Qrcode | null>(null);
+  const scannerContainerId = "qr-reader";
   const navigate = useNavigate();
   const { toast } = useToast();
   
   useEffect(() => {
-    // For demo purposes, simulate QR scanning after a few seconds
-    const timer = setTimeout(() => {
-      if (scanning) {
-        // Success: Navigate to stamp earned screen
-        navigate('/stamp-earned');
-      }
-    }, 3000);
+    // Initialize scanner when component mounts
+    if (!scannerRef.current) {
+      scannerRef.current = new Html5Qrcode(scannerContainerId);
+    }
     
-    return () => clearTimeout(timer);
-  }, [scanning, navigate]);
+    // Start scanning if permission is granted
+    if (hasPermission === true && scanning) {
+      startQRScanner();
+    }
+    
+    // Cleanup scanner when component unmounts
+    return () => {
+      if (scannerRef.current && scanning) {
+        try {
+          scannerRef.current.stop();
+        } catch (error) {
+          console.error("Error stopping scanner:", error);
+        }
+      }
+    };
+  }, [hasPermission, scanning]);
+  
+  // Function to parse QR code data
+  const parseQRData = (data: string): any => {
+    try {
+      // Try to parse as JSON
+      return JSON.parse(data);
+    } catch (error) {
+      // If not valid JSON, return as a string
+      return { rawData: data };
+    }
+  };
+  
+  // Handle successful scan
+  const onScanSuccess = (decodedText: string) => {
+    // Stop scanning
+    if (scannerRef.current) {
+      scannerRef.current.stop().catch(err => {
+        console.error("Error stopping scanner:", err);
+      });
+    }
+    
+    // Parse the QR data
+    const stampData = parseQRData(decodedText);
+    
+    // Ensure the scan has the required information
+    if (!stampData.emirateId || !stampData.locationId) {
+      toast({
+        title: "Invalid QR Code",
+        description: "This isn't a valid Masar stamp QR code",
+        variant: "destructive"
+      });
+      
+      setTimeout(() => setScanning(true), 2000);
+      return;
+    }
+    
+    // Save the collected stamp
+    saveCollectedStamp(stampData);
+    
+    // Show success toast
+    toast({
+      title: "QR Code detected!",
+      description: "Stamp added to your passport"
+    });
+    
+    // Navigate to the stamp earned screen
+    navigate('/stamp-earned');
+  };
+  
+  // Handle scan failures
+  const onScanFailure = (error: any) => {
+    // We can ignore errors since they happen frequently during scanning
+    // console.warn(`QR code scan error: ${error}`);
+  };
+  
+  // Start the QR scanner
+  const startQRScanner = () => {
+    if (!scannerRef.current || !scanning) return;
+    
+    const config = {
+      fps: 10,
+      qrbox: { width: 250, height: 250 },
+      aspectRatio: 1.0
+    };
+    
+    scannerRef.current.start(
+      { facingMode: "environment" }, // Use the back camera
+      config,
+      onScanSuccess,
+      onScanFailure
+    ).then(() => {
+      setHasPermission(true);
+    }).catch(err => {
+      console.error("Error starting scanner:", err);
+      setHasPermission(false);
+      
+      toast({
+        title: "Camera access denied",
+        description: "Please grant camera permission to scan QR codes",
+        variant: "destructive"
+      });
+    });
+  };
+  
+  // Request camera permission and start scanning
+  const requestCameraPermission = () => {
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+      .then(stream => {
+        // Stop the stream immediately, we just needed permission
+        stream.getTracks().forEach(track => track.stop());
+        setHasPermission(true);
+      })
+      .catch(err => {
+        console.error("Error accessing camera:", err);
+        setHasPermission(false);
+        
+        toast({
+          title: "Camera access denied",
+          description: "Please grant camera permission to scan QR codes",
+          variant: "destructive"
+        });
+      });
+  };
+  
+  // Request permission when component mounts
+  useEffect(() => {
+    requestCameraPermission();
+  }, []);
   
   const handleCancel = () => {
+    // Stop scanner if it's running
+    if (scannerRef.current && scanning) {
+      scannerRef.current.stop().catch(err => {
+        console.error("Error stopping scanner:", err);
+      });
+    }
+    
     setScanning(false);
     navigate(-1);
   };
@@ -78,9 +201,12 @@ const ScannerScreen = () => {
       if (!alreadyCollected) {
         collectedStamps[stampData.emirateId].push({
           locationId: stampData.locationId,
-          name: stampData.name,
-          collectedAt: stampData.timestamp
+          name: stampData.name || `Location ${stampData.locationId}`,
+          collectedAt: new Date().toISOString()
         });
+        
+        // Store the current stamp for reference in the earned screen
+        localStorage.setItem('currentScannedStamp', JSON.stringify(stampData));
         
         // Save to localStorage with user-specific key
         localStorage.setItem(getUserStorageKey('collectedStamps'), JSON.stringify(collectedStamps));
@@ -91,8 +217,19 @@ const ScannerScreen = () => {
   };
   
   // For demo purposes, add a way to manually trigger scanning success
-  const triggerSuccess = () => {
-    // Save the stamp data
+  const triggerDemoScan = () => {
+    // Create a demo stamp for Dubai Mall
+    const demoStampData = {
+      emirateId: 'dubai',
+      locationId: 2, // Dubai Mall
+      name: 'Dubai Mall',
+      emirateName: 'Dubai',
+      description: 'Home to over 1,200 retail outlets and 200 food & beverage outlets, Dubai Mall is one of the world\'s largest shopping destinations.',
+      icon: '🛍️',
+      timestamp: new Date().toISOString()
+    };
+    
+    // Save the stamp data and navigate
     saveCollectedStamp(demoStampData);
     
     toast({
@@ -117,35 +254,54 @@ const ScannerScreen = () => {
       
       {/* Scanner UI */}
       <div className="flex-1 flex flex-col items-center justify-center p-6">
-        <div className="relative w-64 h-64 mx-auto mb-8">
-          {/* Scanning animation */}
-          <div className="absolute inset-0 border-2 border-masar-teal rounded-lg overflow-hidden">
-            {scanning && (
-              <div 
-                className="absolute top-0 left-0 right-0 h-1 bg-masar-mint"
-                style={{
-                  animation: 'scanAnimation 2s linear infinite',
-                }}
-              />
-            )}
+        {hasPermission === false && (
+          <div className="text-center text-white mb-8">
+            <p className="mb-4">Camera access is required to scan QR codes.</p>
+            <Button 
+              onClick={requestCameraPermission}
+              className="bg-masar-teal hover:bg-masar-teal/90 text-white"
+            >
+              Grant Camera Permission
+            </Button>
           </div>
-          
-          <div className="absolute top-0 left-0 w-12 h-12 border-t-4 border-l-4 border-masar-teal" />
-          <div className="absolute top-0 right-0 w-12 h-12 border-t-4 border-r-4 border-masar-teal" />
-          <div className="absolute bottom-0 left-0 w-12 h-12 border-b-4 border-l-4 border-masar-teal" />
-          <div className="absolute bottom-0 right-0 w-12 h-12 border-b-4 border-r-4 border-masar-teal" />
-        </div>
+        )}
         
-        <h2 className="text-white text-center text-xl font-bold mb-2">
-          Scan QR Code
-        </h2>
-        <p className="text-white/70 text-center mb-8">
-          Position the QR code within the frame to scan
-        </p>
+        {hasPermission !== false && (
+          <>
+            <div className="relative w-64 h-64 mx-auto mb-8">
+              {/* QR Scanner viewport */}
+              <div id={scannerContainerId} className="w-full h-full"></div>
+              
+              {/* Scanner frame UI */}
+              <div className="absolute inset-0 border-2 border-masar-teal rounded-lg overflow-hidden pointer-events-none">
+                {scanning && (
+                  <div 
+                    className="absolute top-0 left-0 right-0 h-1 bg-masar-mint"
+                    style={{
+                      animation: 'scanAnimation 2s linear infinite',
+                    }}
+                  />
+                )}
+              </div>
+              
+              <div className="absolute top-0 left-0 w-12 h-12 border-t-4 border-l-4 border-masar-teal pointer-events-none" />
+              <div className="absolute top-0 right-0 w-12 h-12 border-t-4 border-r-4 border-masar-teal pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-12 h-12 border-b-4 border-l-4 border-masar-teal pointer-events-none" />
+              <div className="absolute bottom-0 right-0 w-12 h-12 border-b-4 border-r-4 border-masar-teal pointer-events-none" />
+            </div>
+            
+            <h2 className="text-white text-center text-xl font-bold mb-2">
+              Scan QR Code
+            </h2>
+            <p className="text-white/70 text-center mb-8">
+              Position the QR code within the frame to scan
+            </p>
+          </>
+        )}
         
-        {/* Demo buttons - normally wouldn't be in production app */}
+        {/* Demo button - normally wouldn't be in production app */}
         <Button 
-          onClick={triggerSuccess}
+          onClick={triggerDemoScan}
           className="bg-masar-teal hover:bg-masar-teal/90 text-white"
         >
           Demo: Simulate Successful Scan
@@ -169,6 +325,17 @@ const ScannerScreen = () => {
             0% { transform: translateY(0); }
             50% { transform: translateY(256px); }
             100% { transform: translateY(0); }
+          }
+          
+          #${scannerContainerId} video {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover;
+            border-radius: 0.5rem;
+          }
+          
+          #${scannerContainerId} canvas {
+            display: none;
           }
         `}
       </style>
