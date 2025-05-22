@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -92,13 +93,15 @@ const HomeScreen: React.FC = () => {
     
     // Check if user is demo user or new user
     const userName = localStorage.getItem('userName');
-    const isNewUser = !localStorage.getItem('hasViewedHomeScreen');
+    const isNewUser = !localStorage.getItem(getUserStorageKey('hasViewedHomeScreen'));
     const isDemoUser = userName === 'Demo User';
+    
+    // Get user points - default to 0 if not found
     const userPoints = parseInt(localStorage.getItem(getUserStorageKey('userPoints')) || '0', 10);
     
-    if (isNewUser) {
+    if (isNewUser && !isDemoUser) {
       // Mark that user has seen the home screen
-      localStorage.setItem('hasViewedHomeScreen', 'true');
+      localStorage.setItem(getUserStorageKey('hasViewedHomeScreen'), 'true');
     }
     
     setUserData({
@@ -107,11 +110,11 @@ const HomeScreen: React.FC = () => {
       points: userPoints
     });
     
-    // Load stamps data from localStorage for non-demo users
-    if (!isDemoUser) {
-      const storedStamps = localStorage.getItem(getUserStorageKey('collectedStamps'));
-      
-      if (storedStamps) {
+    // Load stamps data from localStorage
+    const storedStamps = localStorage.getItem(getUserStorageKey('collectedStamps'));
+    
+    if (storedStamps) {
+      try {
         const stampsData = JSON.parse(storedStamps);
         
         // Calculate collected stamps for each emirate
@@ -124,12 +127,13 @@ const HomeScreen: React.FC = () => {
         });
         
         setCalculatedEmirateData(updatedEmirateData);
-      } else {
-        // If no stored stamps, reset to default
+      } catch (error) {
+        console.error('Failed to parse stored stamps:', error);
+        // If parsing fails, reset to default data with 0 collected stamps
         setCalculatedEmirateData(emitatesData);
       }
     } else {
-      // Reset for demo users
+      // If no stored stamps, reset to default with 0 collected
       setCalculatedEmirateData(emitatesData);
     }
   };
@@ -169,12 +173,10 @@ const HomeScreen: React.FC = () => {
   }, []);
   
   // Calculate total stamps based on the actual collected stamps data
-  const totalCollectedStamps = userData.isNewUser || userData.isDemoUser ? 0 : 
-    calculatedEmirateData.reduce((sum, emirate) => sum + emirate.collectedStamps, 0);
+  const totalCollectedStamps = calculatedEmirateData.reduce((sum, emirate) => sum + emirate.collectedStamps, 0);
   const totalStamps = calculatedEmirateData.reduce((sum, emirate) => sum + emirate.stampCount, 0);
   
-  const completionPercentage = userData.isNewUser || userData.isDemoUser ? 0 : 
-    Math.round((totalCollectedStamps / totalStamps) * 100);
+  const completionPercentage = Math.round((totalCollectedStamps / totalStamps) * 100);
   
   const handlePassportClick = () => {
     navigate('/passport');
@@ -265,12 +267,12 @@ const HomeScreen: React.FC = () => {
                           {[...Array(emirate.stampCount)].map((_, i) => (
                             <div 
                               key={i} 
-                              className={`w-3 h-3 rounded-full ${(userData.isNewUser || userData.isDemoUser) ? 'bg-white/30' : (i < emirate.collectedStamps ? 'bg-masar-gold' : 'bg-white/30')}`} 
+                              className={`w-3 h-3 rounded-full ${i < emirate.collectedStamps ? 'bg-masar-gold' : 'bg-white/30'}`} 
                             />
                           ))}
                         </div>
                         <span className="ml-2 text-xs text-white">
-                          {userData.isNewUser || userData.isDemoUser ? 0 : emirate.collectedStamps}/{emirate.stampCount}
+                          {emirate.collectedStamps}/{emirate.stampCount}
                         </span>
                       </div>
                     </div>

@@ -10,6 +10,11 @@ const getUserStorageKey = (key: string, userEmail: string): string => {
   return `${userEmail}_${key}`;
 };
 
+// Generate a simple session token
+const generateSessionToken = () => {
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+};
+
 const AuthScreen: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -19,13 +24,31 @@ const AuthScreen: React.FC = () => {
   const location = useLocation();
   const { toast } = useToast();
   
-  // Check if user is already authenticated
+  // Check if user is already authenticated on page load
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-    if (isAuthenticated) {
-      // Already logged in, redirect to home
-      navigate('/home');
-    }
+    const checkExistingSession = () => {
+      const sessionToken = localStorage.getItem('sessionToken');
+      const currentUserEmail = localStorage.getItem('currentUserEmail');
+      const isAuthenticated = localStorage.getItem('isAuthenticated');
+      
+      // If we have a session token and user email, try to resume the session
+      if (sessionToken && currentUserEmail && isAuthenticated === 'true') {
+        const storedUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+        const userExists = storedUsers.some((user: any) => user.email === currentUserEmail);
+        
+        if (userExists) {
+          // Valid session, redirect to home
+          navigate('/home');
+        } else {
+          // Invalid session, clear it
+          localStorage.removeItem('sessionToken');
+          localStorage.removeItem('currentUserEmail');
+          localStorage.removeItem('isAuthenticated');
+        }
+      }
+    };
+    
+    checkExistingSession();
   }, [navigate]);
   
   const handleSubmit = (e: React.FormEvent) => {
@@ -63,18 +86,22 @@ const AuthScreen: React.FC = () => {
         return;
       }
       
+      // Generate a session token
+      const sessionToken = generateSessionToken();
+      
       // User exists, proceed with login and set the userName from the stored user data
       localStorage.setItem('isAuthenticated', 'true');
       localStorage.setItem('currentUserEmail', email);
-      localStorage.setItem('userName', foundUser.name); // Set the username from the found user
+      localStorage.setItem('userName', foundUser.name);
+      localStorage.setItem('sessionToken', sessionToken);
       
       toast({
         title: "Login successful!",
         description: "Welcome back to Masar"
       });
       
-      // Navigate with a slight delay to ensure localStorage is updated
-      setTimeout(() => navigate('/home'), 100);
+      // Navigate to home page
+      navigate('/home');
     } else {
       // This is a sign up
       const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
@@ -88,6 +115,9 @@ const AuthScreen: React.FC = () => {
         });
         return;
       }
+      
+      // Generate a session token
+      const sessionToken = generateSessionToken();
       
       // Register the new user
       const now = new Date();
@@ -105,8 +135,9 @@ const AuthScreen: React.FC = () => {
       localStorage.setItem('isAuthenticated', 'true');
       localStorage.setItem('currentUserEmail', email);
       localStorage.setItem('userName', name);
+      localStorage.setItem('sessionToken', sessionToken);
       
-      // Initialize user data
+      // Initialize user data - make sure it's empty for new users
       localStorage.setItem(getUserStorageKey('userJoinDate', email), joinDate);
       localStorage.setItem(getUserStorageKey('userPoints', email), '0');
       localStorage.setItem(getUserStorageKey('collectedStamps', email), '{}');
@@ -116,16 +147,18 @@ const AuthScreen: React.FC = () => {
         description: "Welcome to Masar"
       });
       
-      // Navigate with a slight delay to ensure localStorage is updated
-      setTimeout(() => navigate('/home'), 100);
+      // Navigate directly to home
+      navigate('/home');
     }
   };
 
   const handleDemoLogin = () => {
     // For demo purposes, skip login
+    const sessionToken = generateSessionToken();
     localStorage.setItem('isAuthenticated', 'true');
     localStorage.setItem('userName', 'Demo User');
     localStorage.setItem('currentUserEmail', 'demo@example.com');
+    localStorage.setItem('sessionToken', sessionToken);
     
     // Reset progress tracking for demo user
     localStorage.removeItem('hasViewedHomeScreen');
@@ -138,8 +171,8 @@ const AuthScreen: React.FC = () => {
       description: "You're using a demo account with no progress"
     });
     
-    // Navigate with a slight delay to ensure localStorage is updated
-    setTimeout(() => navigate('/home'), 100);
+    // Navigate directly to home
+    navigate('/home');
   };
 
   return (

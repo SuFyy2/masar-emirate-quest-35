@@ -18,15 +18,29 @@ import { Toaster } from './components/ui/toaster';
 function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [isDemoMode, setIsDemoMode] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     // Check if the user is in demo mode
     const userName = localStorage.getItem('userName');
+    const sessionToken = localStorage.getItem('sessionToken');
+    const currentUserEmail = localStorage.getItem('currentUserEmail');
+    const authStatus = localStorage.getItem('isAuthenticated') === 'true';
+    
     setIsDemoMode(userName === 'Demo User');
+    setIsAuthenticated(authStatus && !!sessionToken && !!currentUserEmail);
 
-    // Set a default user email if none exists
+    // Set a default user email if none exists (legacy support)
     if (!localStorage.getItem('currentUserEmail')) {
       localStorage.setItem('currentUserEmail', 'default@example.com');
+    }
+    
+    // If user refreshes the page and isn't authenticated, make sure to show splash screen
+    if (!authStatus || !sessionToken) {
+      setShowSplash(true);
+    } else {
+      // User is authenticated, skip splash screen
+      setShowSplash(false);
     }
   }, []);
 
@@ -38,7 +52,7 @@ function App() {
     <Router>
       <div className="App">
         <Routes>
-          <Route path="/" element={showSplash ? <SplashScreen onComplete={handleSplashComplete} /> : <HomeScreen />} />
+          <Route path="/" element={showSplash ? <SplashScreen onComplete={handleSplashComplete} /> : <Navigate to="/home" replace />} />
           <Route path="/onboarding" element={<OnboardingScreen />} />
           <Route path="/auth" element={<AuthScreen />} />
           <Route path="/login" element={<Navigate to="/auth" replace />} /> {/* Redirect /login to /auth */}

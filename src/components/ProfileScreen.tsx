@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -68,14 +69,14 @@ const ProfileScreen = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [userName, setUserName] = useState('Explorer');
-  const [isNewOrDemoUser, setIsNewOrDemoUser] = useState(false);
+  const [isNewUser, setIsNewUser] = useState(false);
   const [isDemoUser, setIsDemoUser] = useState(false);
   
   // Profile editing state
   const [isEditing, setIsEditing] = useState(false);
   const [userProfile, setUserProfile] = useState(defaultUserProfile);
   
-  // Get stamps collected from localStorage or default to 0 for new/demo users
+  // Get stamps collected from localStorage or default to empty object
   const [stampsCollected, setStampsCollected] = useState({});
   
   useEffect(() => {
@@ -89,25 +90,27 @@ const ProfileScreen = () => {
     
     // Get the current username from localStorage whenever component mounts
     const storedUserName = localStorage.getItem('userName');
+    const currentUserEmail = localStorage.getItem('currentUserEmail');
+    
     if (storedUserName) {
       setUserName(storedUserName);
       
       // Check if demo user
-      if (storedUserName === 'Demo User') {
-        setIsDemoUser(true);
-        setIsNewOrDemoUser(true);
-      } else {
-        // Check if new user (first time viewing profile)
-        const hasViewedProfileBefore = localStorage.getItem(getUserStorageKey('hasViewedProfileBefore'));
-        if (!hasViewedProfileBefore) {
-          localStorage.setItem(getUserStorageKey('hasViewedProfileBefore'), 'true');
-          setIsNewOrDemoUser(true);
-        }
+      const isDemo = storedUserName === 'Demo User';
+      setIsDemoUser(isDemo);
+      
+      // For all new users or demo users, set isNewUser to true
+      const hasViewedProfileBefore = localStorage.getItem(getUserStorageKey('hasViewedProfileBefore'));
+      setIsNewUser(!hasViewedProfileBefore || isDemo);
+      
+      // Mark that user has seen the profile page (only for non-demo users)
+      if (!isDemo && !hasViewedProfileBefore) {
+        localStorage.setItem(getUserStorageKey('hasViewedProfileBefore'), 'true');
       }
     }
     
     // Load saved profile data if it exists
-    if (!isDemoUser) {
+    if (currentUserEmail && currentUserEmail !== 'demo@example.com') {
       const savedProfile = localStorage.getItem(getUserStorageKey('userProfile'));
       if (savedProfile) {
         setUserProfile(JSON.parse(savedProfile));
@@ -121,15 +124,31 @@ const ProfileScreen = () => {
     }
     
     // Load stamps data from localStorage
-    const storedStamps = localStorage.getItem(getUserStorageKey('collectedStamps'));
-    if (storedStamps && !isDemoUser && !isNewOrDemoUser) {
-      setStampsCollected(JSON.parse(storedStamps));
-    }
-  }, [isDemoUser, navigate]);
+    loadUserStampsData();
+  }, [navigate]);
 
-  // Calculate collected stamps based on the stored data or use 0 for new/demo users
+  // Function to load user stamps data
+  const loadUserStampsData = () => {
+    const storedStamps = localStorage.getItem(getUserStorageKey('collectedStamps'));
+    
+    if (storedStamps) {
+      try {
+        const parsedStamps = JSON.parse(storedStamps);
+        setStampsCollected(parsedStamps);
+      } catch (error) {
+        console.error('Failed to parse stored stamps:', error);
+        setStampsCollected({});
+      }
+    } else {
+      // If no stamps data, initialize with empty object
+      setStampsCollected({});
+    }
+  };
+
+  // Calculate collected stamps based on the stored data, ensuring new users start with 0
   const calculateEmiratesProgress = () => {
-    if (isNewOrDemoUser || isDemoUser) {
+    if (isNewUser || isDemoUser) {
+      // For new users or demo users, always return 0 collected
       return emitatesData.map(emirate => ({
         ...emirate,
         collected: 0
@@ -137,32 +156,29 @@ const ProfileScreen = () => {
     }
     
     // If we have stored stamps data, use it to calculate progress
-    if (Object.keys(stampsCollected).length > 0) {
-      return emitatesData.map(emirate => {
-        const emirateStamps = stampsCollected[emirate.id] || [];
-        return {
-          ...emirate,
-          collected: emirateStamps.length
-        };
-      });
-    }
-    
-    // Otherwise use the default data
-    return emitatesData;
+    return emitatesData.map(emirate => {
+      const emirateStamps = stampsCollected[emirate.id] || [];
+      return {
+        ...emirate,
+        collected: emirateStamps.length
+      };
+    });
   };
   
   const emiratesWithProgress = calculateEmiratesProgress();
   
   // For new/demo users, show 0 collected stamps
-  const totalCollected = isNewOrDemoUser || isDemoUser ? 0 : 
-    emiratesWithProgress.reduce((sum, emirate) => sum + emirate.collected, 0);
+  const totalCollected = emiratesWithProgress.reduce((sum, emirate) => sum + emirate.collected, 0);
   const totalStamps = emitatesData.reduce((sum, emirate) => sum + emirate.total, 0);
   
-  const completionPercentage = isNewOrDemoUser || isDemoUser ? 0 : 
-    Math.round((totalCollected / totalStamps) * 100);
+  const completionPercentage = Math.round((totalCollected / totalStamps) * 100);
 
   const handleLogout = () => {
     localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('currentUserEmail');
+    localStorage.removeItem('sessionToken');
+    
     toast({
       title: "Logged out successfully",
       description: "See you again soon!"
@@ -343,7 +359,7 @@ const ProfileScreen = () => {
               <h3 className="font-medium text-masar-teal">Emirates</h3>
             </div>
             <p className="text-2xl font-bold text-masar-teal">
-              {isNewOrDemoUser || isDemoUser ? 0 : emiratesWithProgress.filter(e => e.collected > 0).length}/{emitatesData.length}
+              {emiratesWithProgress.filter(e => e.collected > 0).length}/{emitatesData.length}
             </p>
           </Card>
         </div>
