@@ -147,7 +147,7 @@ const ScannerScreen: React.FC = () => {
       toast({
         title: "Already Collected",
         description: "You've already collected this stamp!",
-        variant: "warning"
+        variant: "default" // Changed from "warning" to "default"
       });
       return;
     }
