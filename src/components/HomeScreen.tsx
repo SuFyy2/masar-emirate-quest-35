@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Map, Compass, User, Award } from 'lucide-react';
+import { Map, Compass, User, Award, Gift } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Progress } from "@/components/ui/progress";
 
@@ -307,6 +306,10 @@ const HomeScreen: React.FC = () => {
               <Compass className="w-6 h-6 text-white" />
             </div>
             <span className="text-xs mt-1">Scan</span>
+          </Button>
+          <Button variant="ghost" className="flex flex-col items-center text-gray-400" onClick={() => navigate('/rewards')}>
+            <Gift className="w-6 h-6" />
+            <span className="text-xs mt-1">Rewards</span>
           </Button>
           <Button variant="ghost" className="flex flex-col items-center text-gray-400" onClick={() => navigate('/profile')}>
             <User className="w-6 h-6" />

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -80,6 +79,7 @@ const RewardsScreen: React.FC = () => {
   const [activeVoucher, setActiveVoucher] = useState<RedeemedReward | null>(null);
   const [remainingSeconds, setRemainingSeconds] = useState(0);
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
+  const [isDemoUser, setIsDemoUser] = useState(false);
 
   // Load user data when component mounts
   useEffect(() => {
@@ -90,6 +90,10 @@ const RewardsScreen: React.FC = () => {
       navigate('/auth');
       return;
     }
+
+    // Check if user is a demo user
+    const userName = localStorage.getItem('userName');
+    setIsDemoUser(userName === 'Demo User');
 
     // Load user points
     const storedPoints = localStorage.getItem(getUserStorageKey('userPoints')) || '0';
@@ -166,6 +170,15 @@ const RewardsScreen: React.FC = () => {
   };
 
   const handleRedeemClick = (reward: Reward) => {
+    if (isDemoUser) {
+      toast({
+        title: "Demo User Restricted",
+        description: "Demo users cannot redeem rewards. Sign up for a full account!",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setSelectedReward(reward);
     setIsDialogOpen(true);
   };
@@ -306,6 +319,13 @@ const RewardsScreen: React.FC = () => {
       {/* Available Rewards */}
       <div className="p-4">
         <h2 className="text-xl font-bold mb-4 text-masar-blue">Available Rewards</h2>
+        {isDemoUser && (
+          <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+            <p className="text-amber-700 text-sm">
+              <strong>Demo Mode:</strong> Points and rewards are disabled in demo mode. Create an account to earn and redeem rewards!
+            </p>
+          </div>
+        )}
         <div className="space-y-4">
           {availableRewards.map((reward) => (
             <Card key={reward.id} className="p-4 flex items-center">
@@ -328,7 +348,7 @@ const RewardsScreen: React.FC = () => {
                 variant="default" 
                 className="bg-masar-teal hover:bg-masar-teal/90"
                 onClick={() => handleRedeemClick(reward)}
-                disabled={userPoints < reward.pointsCost || !!activeVoucher}
+                disabled={userPoints < reward.pointsCost || !!activeVoucher || isDemoUser}
               >
                 Redeem
               </Button>
@@ -501,6 +521,10 @@ const RewardsScreen: React.FC = () => {
               <Compass className="w-6 h-6 text-gray-500" />
             </div>
             <span className="text-xs mt-1">Scan</span>
+          </Button>
+          <Button variant="ghost" className="flex flex-col items-center text-masar-teal" onClick={() => {}}>
+            <Gift className="w-6 h-6" />
+            <span className="text-xs mt-1">Rewards</span>
           </Button>
           <Button variant="ghost" className="flex flex-col items-center text-gray-400" onClick={() => navigate('/profile')}>
             <User className="w-6 h-6" />

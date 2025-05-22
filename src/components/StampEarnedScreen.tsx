@@ -1,281 +1,137 @@
 
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Camera, ArrowLeft } from 'lucide-react';
-import { useToast } from "@/hooks/use-toast";
-
-// Default stamp data (fallback)
-const defaultStampData = {
-  emirateId: 'dubai',
-  locationId: 2,
-  name: 'Dubai Mall',
-  emirateName: 'Dubai',
-  description: 'Home to over 1,200 retail outlets and 200 food & beverage outlets, Dubai Mall is one of the world\'s largest shopping destinations.',
-  icon: '🛍️',
-  points: 50
-};
-
-// Helper function to get user-specific storage key
-const getUserStorageKey = (key: string): string => {
-  const currentUserEmail = localStorage.getItem('currentUserEmail');
-  if (!currentUserEmail) return key; // Fallback
-  return `${currentUserEmail}_${key}`;
-};
-
-// Function to create confetti elements
-const createConfetti = (container: HTMLDivElement) => {
-  const confettiCount = 100;
-  const colors = ['#0D9B8A', '#E1B14C', '#F9F5E7', '#A8E0D1'];
-  
-  for (let i = 0; i < confettiCount; i++) {
-    const confetti = document.createElement('div');
-    confetti.className = 'confetti animate-confetti';
-    confetti.style.left = `${Math.random() * 100}vw`;
-    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-    confetti.style.animationDuration = `${Math.random() * 3 + 2}s`;
-    confetti.style.animationDelay = `${Math.random() * 2}s`;
-    container.appendChild(confetti);
-  }
-};
+import { Card } from "@/components/ui/card";
+import { Award, ChevronRight } from 'lucide-react';
+import confetti from 'canvas-confetti';
 
 const StampEarnedScreen: React.FC = () => {
-  const [showAddMemory, setShowAddMemory] = useState(false);
-  const [note, setNote] = useState('');
-  const [stampData, setStampData] = useState(defaultStampData);
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const location = useLocation();
+  const [isDemoScan, setIsDemoScan] = useState(false);
   
-  // Reference for confetti container
-  const confettiContainerRef = React.useRef<HTMLDivElement>(null);
+  // Extract data from location state
+  const { emirateId, stampId, pointsEarned, totalPoints, isDemoScan: isDemo } = 
+    location.state || {};
   
   useEffect(() => {
-    // Try to load scanned stamp data from localStorage
-    try {
-      const scannedStampString = localStorage.getItem('currentScannedStamp');
-      if (scannedStampString) {
-        const scannedStamp = JSON.parse(scannedStampString);
-        setStampData({
-          ...defaultStampData,
-          ...scannedStamp
-        });
-        
-        // Clear the current scanned stamp
-        localStorage.removeItem('currentScannedStamp');
-      }
-    } catch (error) {
-      console.error("Error loading scanned stamp data:", error);
+    // Check if this is a demo scan
+    if (isDemo) {
+      setIsDemoScan(true);
     }
     
-    // Create confetti when component mounts
-    if (confettiContainerRef.current) {
-      createConfetti(confettiContainerRef.current);
+    // If no stamp data, redirect to home
+    if (!emirateId || !stampId) {
+      navigate('/home');
+      return;
     }
     
-    // Clean up confetti when component unmounts
-    return () => {
-      if (confettiContainerRef.current) {
-        confettiContainerRef.current.innerHTML = '';
-      }
-    };
-  }, []);
-  
-  const handleViewPassport = () => {
-    navigate('/passport');
-  };
-  
-  const handleAddMemory = () => {
-    setShowAddMemory(true);
-  };
-  
-  const handleSaveMemory = () => {
-    // In a real app, we would save the memory to the database
-    // For now, just show a success toast
-    toast({
-      title: "Memory Saved",
-      description: "Your memory has been added to your collection"
+    // Trigger confetti effect
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 }
     });
     
-    setShowAddMemory(false);
-    navigate('/passport');
+    // Auto-navigate after 5 seconds
+    const timer = setTimeout(() => {
+      handleContinue();
+    }, 5000);
+    
+    return () => clearTimeout(timer);
+  }, [emirateId, stampId, navigate, isDemo]);
+  
+  const handleContinue = () => {
+    navigate(`/stamp/${emirateId}/${stampId}`);
   };
-
-  // Get the user's total points
-  const totalPoints = parseInt(localStorage.getItem(getUserStorageKey('userPoints')) || '0', 10);
+  
+  const getEmirateName = (id: string) => {
+    const emirateMap: Record<string, string> = {
+      'abu-dhabi': 'Abu Dhabi',
+      'dubai': 'Dubai',
+      'sharjah': 'Sharjah',
+      'ajman': 'Ajman',
+      'umm-al-quwain': 'Umm Al Quwain',
+      'fujairah': 'Fujairah',
+      'ras-al-khaimah': 'Ras Al Khaimah'
+    };
+    return emirateMap[id] || 'Unknown Emirate';
+  };
+  
+  const getStampName = (id: string) => {
+    // Extract the stamp number if it follows the pattern 'demo-stamp-X'
+    if (id.startsWith('demo-stamp-')) {
+      const num = id.split('-').pop();
+      return `Demo Attraction ${num}`;
+    }
+    
+    // For real stamps, would need a lookup table
+    // This is a placeholder
+    return `Attraction ${id.split('-').pop()}`;
+  };
 
   return (
     <div className="min-h-screen bg-masar-cream flex flex-col">
-      {/* Confetti container */}
-      <div ref={confettiContainerRef} className="confetti-container" />
-      
-      {!showAddMemory ? (
-        <>
-          <div className="flex-1 flex flex-col items-center justify-center p-6">
-            <div className="w-32 h-32 bg-masar-teal rounded-full flex items-center justify-center mb-6 animate-bounce">
-              <span className="text-white text-5xl">✓</span>
-            </div>
-            
-            <h1 className="text-2xl font-bold text-masar-teal text-center mb-3 animate-fade-in">
-              You earned a new explorer stamp!
-            </h1>
-            
-            <p className="text-center text-masar-teal/80 mb-4 animate-fade-in">
-              Congratulations on visiting the {stampData.name}! This stamp has been added to your digital passport.
+      <div className="flex-1 flex flex-col items-center justify-center p-6">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-6">
+            <h1 className="text-2xl font-bold text-masar-blue">Stamp Collected!</h1>
+            <p className="text-gray-600">
+              You've added a new stamp to your passport
             </p>
-            
-            {/* Points earned badge */}
-            <div className="bg-masar-gold text-white font-bold text-xl py-2 px-6 rounded-full mb-6 animate-pulse">
-              +{stampData.points} points
+          </div>
+          
+          <Card className="overflow-hidden mb-6">
+            <div className="bg-masar-blue text-white p-4">
+              <h2 className="font-bold text-lg">{getEmirateName(emirateId)}</h2>
+              <p className="text-sm text-masar-mint">{getStampName(stampId)}</p>
+            </div>
+            <div className="p-6 flex items-center justify-center">
+              <div className="w-32 h-32 bg-masar-mint/20 rounded-full flex items-center justify-center">
+                <img 
+                  src="/lovable-uploads/2ca123d8-3083-4c49-a682-ea763b97b288.png" 
+                  alt="Stamp" 
+                  className="w-24 h-24 object-contain" 
+                />
+              </div>
             </div>
             
-            <div className="w-full max-w-sm bg-white rounded-xl p-5 shadow-md mb-6 animate-zoom-in">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="font-bold text-masar-teal">{stampData.name}</h3>
-                  <p className="text-sm text-masar-teal/70">{stampData.emirateName}</p>
+            {!isDemoScan && (
+              <div className="bg-masar-gold/10 p-4 flex items-center justify-between">
+                <div className="flex items-center">
+                  <Award className="text-masar-gold w-5 h-5 mr-2" />
+                  <div>
+                    <p className="text-sm font-medium">You earned</p>
+                    <p className="font-bold text-masar-gold text-lg">+{pointsEarned} points</p>
+                  </div>
                 </div>
-                <div className="w-16 h-16 bg-masar-gold/20 rounded-full flex items-center justify-center">
-                  <span className="text-masar-gold text-xl">{stampData.icon}</span>
+                <div className="text-right">
+                  <p className="text-sm text-gray-600">Total Points</p>
+                  <p className="font-bold">{totalPoints}</p>
                 </div>
               </div>
-              
-              <div className="text-sm text-masar-teal/80">
-                <p>{stampData.description}</p>
-              </div>
-              
-              <div className="mt-4 pt-3 border-t border-masar-teal/10">
-                <p className="text-sm font-medium text-center text-masar-teal">
-                  Total Explorer Points: {totalPoints}
+            )}
+            
+            {isDemoScan && (
+              <div className="bg-amber-50 p-4">
+                <p className="text-sm text-amber-700">
+                  <strong>Demo Mode:</strong> In a real account, you would earn points for this stamp!
                 </p>
               </div>
-            </div>
-          </div>
+            )}
+          </Card>
           
-          <div className="p-6 space-y-3">
-            <Button 
-              onClick={handleAddMemory}
-              className="w-full bg-masar-teal hover:bg-masar-teal/90 text-white py-6 h-auto"
-            >
-              <Camera className="mr-2 h-5 w-5" /> Add Photo & Memory
-            </Button>
-            
-            <Button 
-              variant="outline"
-              onClick={handleViewPassport}
-              className="w-full border-masar-teal text-masar-teal py-6 h-auto"
-            >
-              View in Passport
-            </Button>
-          </div>
-        </>
-      ) : (
-        <>
-          <div className="bg-masar-gold text-white p-4">
-            <div className="flex items-center">
-              <Button 
-                variant="ghost" 
-                className="text-white p-2 h-auto" 
-                onClick={() => setShowAddMemory(false)}
-              >
-                <ArrowLeft className="w-6 h-6" />
-              </Button>
-              <h1 className="text-xl font-bold ml-2">Add Memory</h1>
-            </div>
-          </div>
-          
-          <div className="flex-1 p-6">
-            <div className="mb-6">
-              <h2 className="text-lg font-medium text-masar-teal mb-2">Add Photo</h2>
-              <div className="bg-gray-100 rounded-lg aspect-video flex items-center justify-center border-2 border-dashed border-masar-teal/30">
-                <div className="text-center">
-                  <Camera className="w-12 h-12 text-masar-teal/50 mx-auto mb-2" />
-                  <p className="text-masar-teal/70">Tap to add photo</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="mb-6">
-              <h2 className="text-lg font-medium text-masar-teal mb-2">Add Note</h2>
-              <textarea 
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                placeholder="Write your memory here..."
-                className="w-full h-32 p-3 rounded-lg border-2 border-masar-mint focus:border-masar-teal outline-none"
-              />
-            </div>
-            
-            <Button 
-              onClick={handleSaveMemory}
-              className="w-full bg-masar-teal hover:bg-masar-teal/90 text-white py-4 h-auto"
-            >
-              Save Memory
-            </Button>
-          </div>
-        </>
-      )}
+          <Button 
+            className="w-full bg-masar-teal hover:bg-masar-teal/90 flex items-center justify-center"
+            onClick={handleContinue}
+          >
+            View Details <ChevronRight className="ml-1 w-4 h-4" />
+          </Button>
+        </div>
+      </div>
       
-      <style>
-        {`
-        .confetti-container {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          pointer-events: none;
-          z-index: 100;
-          overflow: hidden;
-        }
-        
-        .confetti {
-          position: absolute;
-          width: 10px;
-          height: 10px;
-          opacity: 0.7;
-        }
-        
-        @keyframes confetti-fall {
-          0% {
-            transform: translateY(-100vh) rotate(0deg);
-          }
-          100% {
-            transform: translateY(100vh) rotate(720deg);
-          }
-        }
-        
-        .animate-confetti {
-          animation: confetti-fall 3s linear forwards;
-        }
-        
-        @keyframes zoom-in {
-          from {
-            opacity: 0;
-            transform: scale(0.9);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-        
-        .animate-zoom-in {
-          animation: zoom-in 0.5s ease-out forwards;
-        }
-        
-        @keyframes fade-in {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-        
-        .animate-fade-in {
-          animation: fade-in 0.8s ease-out forwards;
-        }
-        `}
-      </style>
+      <div className="bg-masar-cream h-24"></div>
     </div>
   );
 };

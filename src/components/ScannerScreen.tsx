@@ -2,9 +2,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Camera } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Card } from "@/components/ui/card";
+import { ArrowLeft, Map, Compass, User, Gift, X, Camera } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
+import { useToast } from "@/hooks/use-toast";
 
 // Helper function to get user-specific storage key
 const getUserStorageKey = (key: string): string => {
@@ -14,340 +15,300 @@ const getUserStorageKey = (key: string): string => {
 };
 
 const ScannerScreen: React.FC = () => {
-  const [scanning, setScanning] = useState<boolean>(true);
-  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
-  const scannerRef = useRef<Html5Qrcode | null>(null);
-  const scannerContainerId = "qr-reader";
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+  const [isScanning, setIsScanning] = useState(false);
+  const [isDemoUser, setIsDemoUser] = useState(false);
+  const scannerRef = useRef<Html5Qrcode | null>(null);
+  const scannerContainerId = "scanner-container";
+
   useEffect(() => {
-    // Initialize scanner when component mounts
-    if (!scannerRef.current) {
-      scannerRef.current = new Html5Qrcode(scannerContainerId);
+    // Check if user is authenticated
+    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+    if (!isAuthenticated) {
+      navigate('/auth');
+      return;
     }
-    
-    // Start scanning if permission is granted
-    if (hasPermission === true && scanning) {
-      startQRScanner();
-    }
-    
-    // Cleanup scanner when component unmounts
+
+    // Check if user is a demo user
+    const userName = localStorage.getItem('userName');
+    setIsDemoUser(userName === 'Demo User');
+
+    // Clean up scanner on component unmount
     return () => {
-      if (scannerRef.current && scanning) {
-        try {
-          scannerRef.current.stop();
-        } catch (error) {
-          console.error("Error stopping scanner:", error);
-        }
+      if (scannerRef.current && scannerRef.current.isScanning) {
+        scannerRef.current.stop().catch(error => {
+          console.error('Error stopping scanner:', error);
+        });
       }
     };
-  }, [hasPermission, scanning]);
-  
-  // Function to parse QR code data
-  const parseQRData = (data: string): any => {
-    try {
-      // Try to parse as JSON
-      return JSON.parse(data);
-    } catch (error) {
-      // If not valid JSON, return as a string
-      return { rawData: data };
+  }, [navigate]);
+
+  const startScanner = () => {
+    if (isDemoUser) {
+      toast({
+        title: "Demo Mode",
+        description: "Camera access is restricted in demo mode. Try the demo scan instead.",
+        variant: "destructive"
+      });
+      return;
     }
+
+    // Initialize scanner
+    const html5QrCode = new Html5Qrcode(scannerContainerId);
+    scannerRef.current = html5QrCode;
+
+    html5QrCode.start(
+      { facingMode: "environment" },
+      {
+        fps: 10,
+        qrbox: { width: 250, height: 250 },
+        aspectRatio: 1
+      },
+      (decodedText) => {
+        // Successfully scanned QR code
+        console.log(`Code scanned: ${decodedText}`);
+        handleQRCodeScanned(decodedText);
+        stopScanner();
+      },
+      (errorMessage) => {
+        // Error scanning QR code
+        console.error(`QR Code scanning error: ${errorMessage}`);
+      }
+    ).catch(err => {
+      toast({
+        title: "Camera Error",
+        description: "Could not access your camera. Please check permissions.",
+        variant: "destructive"
+      });
+      console.error("Error starting scanner:", err);
+    });
+
+    setIsScanning(true);
   };
-  
-  // Handle successful scan
-  const onScanSuccess = (decodedText: string) => {
-    // Stop scanning
-    if (scannerRef.current) {
-      scannerRef.current.stop().catch(err => {
+
+  const stopScanner = () => {
+    if (scannerRef.current && scannerRef.current.isScanning) {
+      scannerRef.current.stop().then(() => {
+        console.log('Scanner stopped');
+        setIsScanning(false);
+      }).catch(err => {
         console.error("Error stopping scanner:", err);
       });
     }
-    
-    // Parse the QR data
-    const stampData = parseQRData(decodedText);
-    
-    // Ensure the scan has the required information
-    if (!stampData.emirateId || !stampData.locationId) {
+  };
+
+  const handleQRCodeScanned = (scannedData: string) => {
+    try {
+      // Try to parse the scanned data as JSON
+      const stampData = JSON.parse(scannedData);
+      
+      if (stampData.type === 'masar-stamp' && stampData.emirateId && stampData.stampId) {
+        // Process the stamp data
+        processStampData(stampData);
+      } else {
+        toast({
+          title: "Invalid QR Code",
+          description: "This QR code is not a valid Masar stamp.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
       toast({
-        title: "Invalid QR Code",
-        description: "This isn't a valid Masar stamp QR code",
+        title: "Invalid QR Code Format",
+        description: "Could not read the QR code data.",
         variant: "destructive"
       });
-      
-      setTimeout(() => setScanning(true), 2000);
+      console.error('Error parsing QR code data:', error);
+    }
+  };
+
+  const processStampData = (stampData: { emirateId: string, stampId: string, type: string }) => {
+    // Load existing collected stamps from localStorage
+    const existingStampsJson = localStorage.getItem(getUserStorageKey('collectedStamps')) || '{}';
+    let collectedStamps;
+    
+    try {
+      collectedStamps = JSON.parse(existingStampsJson);
+    } catch (error) {
+      console.error('Error parsing stored stamps:', error);
+      collectedStamps = {};
+    }
+    
+    // Check if this emirate exists in collected stamps
+    if (!collectedStamps[stampData.emirateId]) {
+      collectedStamps[stampData.emirateId] = [];
+    }
+    
+    // Check if this stamp is already collected
+    const isAlreadyCollected = collectedStamps[stampData.emirateId].includes(stampData.stampId);
+    
+    if (isAlreadyCollected) {
+      toast({
+        title: "Already Collected",
+        description: "You've already collected this stamp!",
+        variant: "warning"
+      });
       return;
     }
     
-    // Save the collected stamp and add points
-    saveCollectedStamp(stampData);
+    // Add the new stamp
+    collectedStamps[stampData.emirateId].push(stampData.stampId);
     
-    // Show success toast
-    toast({
-      title: "QR Code detected!",
-      description: "Stamp added to your passport"
-    });
+    // Save updated stamps
+    localStorage.setItem(getUserStorageKey('collectedStamps'), JSON.stringify(collectedStamps));
     
-    // Navigate to the stamp earned screen
-    navigate('/stamp-earned');
-  };
-  
-  // Handle scan failures
-  const onScanFailure = (error: any) => {
-    // We can ignore errors since they happen frequently during scanning
-  };
-  
-  // Start the QR scanner
-  const startQRScanner = () => {
-    if (!scannerRef.current || !scanning) return;
+    // Award points to the user (10 points per stamp)
+    const currentPoints = parseInt(localStorage.getItem(getUserStorageKey('userPoints')) || '0', 10);
+    const newPoints = currentPoints + 10;
+    localStorage.setItem(getUserStorageKey('userPoints'), newPoints.toString());
     
-    const config = {
-      fps: 10,
-      qrbox: { width: 250, height: 250 },
-      aspectRatio: 1.0
-    };
-    
-    scannerRef.current.start(
-      { facingMode: "environment" }, // Use the back camera
-      config,
-      onScanSuccess,
-      onScanFailure
-    ).then(() => {
-      setHasPermission(true);
-    }).catch(err => {
-      console.error("Error starting scanner:", err);
-      setHasPermission(false);
-      
-      toast({
-        title: "Camera access denied",
-        description: "Please grant camera permission to scan QR codes",
-        variant: "destructive"
-      });
+    // Navigate to stamp earned screen
+    navigate('/stamp-earned', { 
+      state: { 
+        emirateId: stampData.emirateId,
+        stampId: stampData.stampId,
+        pointsEarned: 10,
+        totalPoints: newPoints
+      } 
     });
   };
-  
-  // Request camera permission and start scanning
-  const requestCameraPermission = () => {
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-      .then(stream => {
-        // Stop the stream immediately, we just needed permission
-        stream.getTracks().forEach(track => track.stop());
-        setHasPermission(true);
-      })
-      .catch(err => {
-        console.error("Error accessing camera:", err);
-        setHasPermission(false);
-        
-        toast({
-          title: "Camera access denied",
-          description: "Please grant camera permission to scan QR codes",
-          variant: "destructive"
-        });
-      });
-  };
-  
-  // Request permission when component mounts
-  useEffect(() => {
-    requestCameraPermission();
-  }, []);
-  
-  const handleCancel = () => {
-    // Stop scanner if it's running
-    if (scannerRef.current && scanning) {
-      scannerRef.current.stop().catch(err => {
-        console.error("Error stopping scanner:", err);
-      });
-    }
+
+  const handleDemoScan = () => {
+    // Generate a random emirate and stamp ID for demo purposes
+    const emirates = ['abu-dhabi', 'dubai', 'sharjah', 'ajman', 'umm-al-quwain', 'fujairah', 'ras-al-khaimah'];
+    const randomEmirateIndex = Math.floor(Math.random() * emirates.length);
+    const randomEmirateId = emirates[randomEmirateIndex];
+    const randomStampId = `demo-stamp-${Math.floor(Math.random() * 5) + 1}`;
     
-    setScanning(false);
-    navigate(-1);
-  };
-  
-  // Function to save the collected stamp data and award points
-  const saveCollectedStamp = (stampData: any) => {
-    // Don't save for demo users
-    const userName = localStorage.getItem('userName');
-    const isDemoUser = userName === 'Demo User';
-    
-    try {
-      // Set user join date if not already set
-      if (!localStorage.getItem(getUserStorageKey('userJoinDate'))) {
-        const now = new Date();
-        const joinDate = `${now.toLocaleString('default', { month: 'long' })} ${now.getFullYear()}`;
-        localStorage.setItem(getUserStorageKey('userJoinDate'), joinDate);
-      }
-      
-      // Get existing stamps from localStorage
-      const existingStampsString = localStorage.getItem(getUserStorageKey('collectedStamps'));
-      let collectedStamps: Record<string, any[]> = {};
-      
-      if (existingStampsString) {
-        collectedStamps = JSON.parse(existingStampsString);
-      }
-      
-      // Add the new stamp
-      if (!collectedStamps[stampData.emirateId]) {
-        collectedStamps[stampData.emirateId] = [];
-      }
-      
-      // Check if this stamp was already collected
-      const alreadyCollected = collectedStamps[stampData.emirateId].some(
-        stamp => stamp.locationId === stampData.locationId
-      );
-      
-      if (!alreadyCollected) {
-        // Add points for collecting a new stamp
-        const pointsToAdd = 50; // Base points for each stamp
-        
-        collectedStamps[stampData.emirateId].push({
-          locationId: stampData.locationId,
-          name: stampData.name || `Location ${stampData.locationId}`,
-          collectedAt: new Date().toISOString(),
-          points: pointsToAdd
-        });
-        
-        // Store the current stamp for reference in the earned screen
-        localStorage.setItem('currentScannedStamp', JSON.stringify({
-          ...stampData,
-          points: pointsToAdd
-        }));
-        
-        // Save to localStorage with user-specific key
-        localStorage.setItem(getUserStorageKey('collectedStamps'), JSON.stringify(collectedStamps));
-        
-        // Update the user's total points
-        const currentPoints = parseInt(localStorage.getItem(getUserStorageKey('userPoints')) || '0', 10);
-        const newTotalPoints = currentPoints + pointsToAdd;
-        localStorage.setItem(getUserStorageKey('userPoints'), newTotalPoints.toString());
-      }
-    } catch (error) {
-      console.error("Error saving stamp data:", error);
-    }
-  };
-  
-  // For demo purposes, add a way to manually trigger scanning success
-  const triggerDemoScan = () => {
-    // Create a demo stamp for Dubai Mall
     const demoStampData = {
-      emirateId: 'dubai',
-      locationId: 2, // Dubai Mall
-      name: 'Dubai Mall',
-      emirateName: 'Dubai',
-      description: 'Home to over 1,200 retail outlets and 200 food & beverage outlets, Dubai Mall is one of the world\'s largest shopping destinations.',
-      icon: '🛍️',
-      timestamp: new Date().toISOString()
+      type: 'masar-stamp',
+      emirateId: randomEmirateId,
+      stampId: randomStampId
     };
     
-    // Save the stamp data and navigate
-    saveCollectedStamp(demoStampData);
-    
-    toast({
-      title: "QR Code detected!",
-    });
-    
-    navigate('/stamp-earned');
+    if (isDemoUser) {
+      // For demo users, show the stamp experience but don't award points or save progress
+      toast({
+        title: "Demo Scan",
+        description: "This is a demo scan. In a real account, you would earn points!",
+      });
+      
+      navigate('/stamp-earned', { 
+        state: { 
+          emirateId: demoStampData.emirateId,
+          stampId: demoStampData.stampId,
+          pointsEarned: 10,
+          totalPoints: 10,
+          isDemoScan: true
+        } 
+      });
+    } else {
+      // For real users, process the stamp like a real scan
+      processStampData(demoStampData);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-black flex flex-col">
+    <div className="min-h-screen bg-masar-cream pb-20">
       {/* Header */}
-      <div className="p-4">
-        <Button 
-          variant="ghost" 
-          className="text-white p-2 h-auto" 
-          onClick={handleCancel}
-        >
-          <ArrowLeft className="w-6 h-6" />
-        </Button>
+      <div className="text-white p-4 bg-masar-blue">
+        <div className="flex items-center">
+          <Button variant="ghost" className="text-white p-2 h-auto" onClick={() => navigate(-1)}>
+            <ArrowLeft className="w-6 h-6" />
+          </Button>
+          <h1 className="text-xl font-bold ml-2">Scan QR Code</h1>
+        </div>
       </div>
-      
-      {/* Scanner UI */}
-      <div className="flex-1 flex flex-col items-center justify-center p-6">
-        {hasPermission === false && (
-          <div className="text-center text-white mb-8">
-            <p className="mb-4">Camera access is required to scan QR codes.</p>
-            <Button 
-              onClick={requestCameraPermission}
-              className="bg-masar-teal hover:bg-masar-teal/90 text-white"
-            >
-              Grant Camera Permission
-            </Button>
-          </div>
-        )}
-        
-        {hasPermission !== false && (
-          <>
-            <div className="relative w-64 h-64 mx-auto mb-8">
-              {/* QR Scanner viewport */}
-              <div id={scannerContainerId} className="w-full h-full"></div>
-              
-              {/* Scanner frame UI */}
-              <div className="absolute inset-0 border-2 border-masar-teal rounded-lg overflow-hidden pointer-events-none">
-                {scanning && (
-                  <div 
-                    className="absolute top-0 left-0 right-0 h-1 bg-masar-mint"
-                    style={{
-                      animation: 'scanAnimation 2s linear infinite',
-                    }}
-                  />
-                )}
+
+      {/* Scanner Area */}
+      <div className="p-4 flex flex-col items-center">
+        <div className="w-full max-w-sm mb-4">
+          <Card className={`w-full aspect-square relative ${isScanning ? 'border-2 border-masar-teal' : 'bg-gray-100'}`}>
+            {isScanning ? (
+              <>
+                <div id={scannerContainerId} className="absolute inset-0"></div>
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  className="absolute top-2 right-2 z-10 bg-white"
+                  onClick={stopScanner}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </>
+            ) : (
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
+                <Camera className="w-16 h-16 text-gray-400 mb-4" />
+                <p className="text-center text-gray-500 mb-4">
+                  {isDemoUser 
+                    ? "Camera access is restricted in demo mode. Try the demo scan instead."
+                    : "Position the QR code in the scanner to collect your stamp"}
+                </p>
               </div>
-              
-              <div className="absolute top-0 left-0 w-12 h-12 border-t-4 border-l-4 border-masar-teal pointer-events-none" />
-              <div className="absolute top-0 right-0 w-12 h-12 border-t-4 border-r-4 border-masar-teal pointer-events-none" />
-              <div className="absolute bottom-0 left-0 w-12 h-12 border-b-4 border-l-4 border-masar-teal pointer-events-none" />
-              <div className="absolute bottom-0 right-0 w-12 h-12 border-b-4 border-r-4 border-masar-teal pointer-events-none" />
+            )}
+          </Card>
+        </div>
+
+        <div className="w-full max-w-sm space-y-3">
+          <Button 
+            className="w-full bg-masar-teal hover:bg-masar-teal/90 text-white"
+            onClick={startScanner}
+            disabled={isScanning || isDemoUser}
+          >
+            {isScanning ? 'Scanning...' : 'Start Scanner'}
+          </Button>
+          
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-gray-300"></span>
             </div>
-            
-            <h2 className="text-white text-center text-xl font-bold mb-2">
-              Scan QR Code
-            </h2>
-            <p className="text-white/70 text-center mb-8">
-              Position the QR code within the frame to scan
-            </p>
-          </>
-        )}
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-masar-cream text-gray-500">OR</span>
+            </div>
+          </div>
+          
+          <Button 
+            variant="outline" 
+            className="w-full border-masar-teal text-masar-teal"
+            onClick={handleDemoScan}
+          >
+            Try Demo Scan
+          </Button>
+        </div>
         
-        {/* Demo button - normally wouldn't be in production app */}
-        <Button 
-          onClick={triggerDemoScan}
-          className="bg-masar-teal/50 hover:bg-masar-teal/70 text-white"
-        >
-          Demo: Simulate Successful Scan
-        </Button>
+        <div className="mt-8 text-center px-4">
+          <h3 className="font-medium text-masar-blue mb-2">How to scan?</h3>
+          <p className="text-sm text-gray-600">
+            Visit an attraction in the UAE and look for Masar QR codes. 
+            Scan them to collect stamps and earn points for your passport!
+          </p>
+        </div>
       </div>
       
-      {/* Footer */}
-      <div className="p-6 bg-black">
-        <Button 
-          variant="outline" 
-          className="w-full border-white text-white"
-          onClick={handleCancel}
-        >
-          Cancel
-        </Button>
+      {/* Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
+        <div className="flex justify-around">
+          <Button variant="ghost" className="flex flex-col items-center text-gray-400" onClick={() => navigate('/home')}>
+            <Map className="w-6 h-6" />
+            <span className="text-xs mt-1">Explore</span>
+          </Button>
+          <Button variant="ghost" className="flex flex-col items-center text-masar-teal" onClick={() => {}}>
+            <div className="bg-masar-teal rounded-full p-3 -mt-8 border-4 border-white">
+              <Compass className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-xs mt-1">Scan</span>
+          </Button>
+          <Button variant="ghost" className="flex flex-col items-center text-gray-400" onClick={() => navigate('/rewards')}>
+            <Gift className="w-6 h-6" />
+            <span className="text-xs mt-1">Rewards</span>
+          </Button>
+          <Button variant="ghost" className="flex flex-col items-center text-gray-400" onClick={() => navigate('/profile')}>
+            <User className="w-6 h-6" />
+            <span className="text-xs mt-1">Profile</span>
+          </Button>
+        </div>
       </div>
-      
-      <style>
-        {`
-          @keyframes scanAnimation {
-            0% { transform: translateY(0); }
-            50% { transform: translateY(256px); }
-            100% { transform: translateY(0); }
-          }
-          
-          #${scannerContainerId} video {
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: cover;
-            border-radius: 0.5rem;
-          }
-          
-          #${scannerContainerId} canvas {
-            display: none;
-          }
-        `}
-      </style>
     </div>
   );
 };
