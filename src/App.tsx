@@ -13,6 +13,7 @@ import ProfileScreen from './components/ProfileScreen';
 import ScannerScreen from './components/ScannerScreen';
 import StampEarnedScreen from './components/StampEarnedScreen';
 import StampDetailScreen from './components/StampDetailScreen';
+import RewardsScreen from './components/RewardsScreen';
 import { Toaster } from './components/ui/toaster';
 
 function App() {
@@ -63,6 +64,7 @@ function App() {
           <Route path="/profile" element={<ProfileScreen />} />
           <Route path="/scan" element={<ScannerScreen />} />
           <Route path="/stamp-earned" element={<StampEarnedScreen />} />
+          <Route path="/rewards" element={<RewardsScreen />} />
         </Routes>
         <Toaster />
       </div>

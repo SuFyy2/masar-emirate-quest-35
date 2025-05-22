@@ -141,6 +141,7 @@ const AuthScreen: React.FC = () => {
       localStorage.setItem(getUserStorageKey('userJoinDate', email), joinDate);
       localStorage.setItem(getUserStorageKey('userPoints', email), '0');
       localStorage.setItem(getUserStorageKey('collectedStamps', email), '{}');
+      localStorage.setItem(getUserStorageKey('redeemedRewards', email), '[]');
       
       toast({
         title: "Account created!",
@@ -165,6 +166,7 @@ const AuthScreen: React.FC = () => {
     localStorage.removeItem('hasViewedProfileBefore');
     localStorage.setItem('demo@example.com_userPoints', '0');
     localStorage.setItem('demo@example.com_collectedStamps', '{}');
+    localStorage.setItem('demo@example.com_redeemedRewards', '[]');
     
     toast({
       title: "Welcome, Demo User!",

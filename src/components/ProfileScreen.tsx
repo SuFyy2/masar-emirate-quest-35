@@ -3,12 +3,22 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, User, Map, Compass, Star, Edit, Save } from 'lucide-react';
+import { ArrowLeft, User, Map, Compass, Star, Edit, Save, Gift, Trash2 } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const emitatesData = [
   {
@@ -71,10 +81,14 @@ const ProfileScreen = () => {
   const [userName, setUserName] = useState('Explorer');
   const [isNewUser, setIsNewUser] = useState(false);
   const [isDemoUser, setIsDemoUser] = useState(false);
+  const [userPoints, setUserPoints] = useState(0);
   
   // Profile editing state
   const [isEditing, setIsEditing] = useState(false);
   const [userProfile, setUserProfile] = useState(defaultUserProfile);
+  
+  // Delete account dialog
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   
   // Get stamps collected from localStorage or default to empty object
   const [stampsCollected, setStampsCollected] = useState({});
@@ -122,6 +136,10 @@ const ProfileScreen = () => {
         });
       }
     }
+    
+    // Load points data
+    const storedPoints = localStorage.getItem(getUserStorageKey('userPoints')) || '0';
+    setUserPoints(parseInt(storedPoints, 10));
     
     // Load stamps data from localStorage
     loadUserStampsData();
@@ -223,15 +241,74 @@ const ProfileScreen = () => {
     });
   };
 
+  const handleDeleteAccount = () => {
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteAccount = () => {
+    const currentUserEmail = localStorage.getItem('currentUserEmail');
+    
+    if (!currentUserEmail || isDemoUser) {
+      toast({
+        title: "Cannot Delete Account",
+        description: "Demo accounts cannot be deleted.",
+        variant: "destructive"
+      });
+      setDeleteDialogOpen(false);
+      return;
+    }
+
+    // Get all registered users
+    const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+    
+    // Filter out the current user
+    const updatedUsers = registeredUsers.filter((user: any) => user.email !== currentUserEmail);
+    
+    // Update registered users
+    localStorage.setItem('registeredUsers', JSON.stringify(updatedUsers));
+    
+    // Remove all user-specific data
+    const allKeys = Object.keys(localStorage);
+    allKeys.forEach(key => {
+      if (key.startsWith(`${currentUserEmail}_`)) {
+        localStorage.removeItem(key);
+      }
+    });
+    
+    // Remove session data
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('currentUserEmail');
+    localStorage.removeItem('sessionToken');
+    
+    toast({
+      title: "Account Deleted",
+      description: "Your account and all associated data has been deleted."
+    });
+    
+    navigate('/auth');
+    setDeleteDialogOpen(false);
+  };
+
+  const navigateToRewards = () => {
+    navigate('/rewards');
+  };
+
   return (
     <div className="min-h-screen bg-masar-cream pb-20">
       {/* Header */}
       <div className="text-white p-4 bg-masar-blue">
-        <div className="flex items-center">
-          <Button variant="ghost" className="text-white p-2 h-auto" onClick={() => navigate(-1)}>
-            <ArrowLeft className="w-6 h-6" />
-          </Button>
-          <h1 className="text-xl font-bold ml-2">My Profile</h1>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <Button variant="ghost" className="text-white p-2 h-auto" onClick={() => navigate(-1)}>
+              <ArrowLeft className="w-6 h-6" />
+            </Button>
+            <h1 className="text-xl font-bold ml-2">My Profile</h1>
+          </div>
+          <div className="flex items-center">
+            <Gift className="w-5 h-5 mr-1" />
+            <span className="font-bold">{userPoints} Points</span>
+          </div>
         </div>
       </div>
       
@@ -259,6 +336,16 @@ const ProfileScreen = () => {
             </Button>
           )}
         </div>
+
+        {/* Rewards Button */}
+        <Button 
+          variant="default" 
+          className="w-full bg-masar-gold hover:bg-masar-gold/90 mb-6 flex items-center justify-center"
+          onClick={navigateToRewards}
+        >
+          <Gift className="w-5 h-5 mr-2" />
+          Rewards & Discounts
+        </Button>
         
         {/* User Profile Fields */}
         <Card className="mb-6 p-4 bg-white shadow-sm">
@@ -380,17 +467,49 @@ const ProfileScreen = () => {
           ))}
         </div>
         
-        {/* Show Login button for demo users, Logout button for regular users */}
+        {/* Show Login button for demo users, Logout and Delete Account buttons for regular users */}
         {isDemoUser ? (
           <Button variant="outline" onClick={handleLogin} className="w-full border-masar-teal text-masar-teal">
             Log In
           </Button>
         ) : (
-          <Button variant="outline" onClick={handleLogout} className="w-full border-masar-teal text-masar-teal">
-            Log Out
-          </Button>
+          <div className="space-y-4">
+            <Button variant="outline" onClick={handleLogout} className="w-full border-masar-teal text-masar-teal">
+              Log Out
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              onClick={handleDeleteAccount} 
+              className="w-full border-red-500 text-red-500 hover:bg-red-500/10"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete Account
+            </Button>
+          </div>
         )}
       </div>
+      
+      {/* Delete Account Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete your account and remove your data from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDeleteAccount}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Yes, delete my account
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       
       {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
