@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -42,7 +41,12 @@ const StampEarnedScreen = () => {
   }, [emirateId, stampId, navigate, isDemo]);
 
   const handleContinue = () => {
-    navigate(`/stamp/${emirateId}/${stampId}`);
+    // If it's a demo scan, navigate to home page instead of stamp detail
+    if (isDemoScan) {
+      navigate('/home');
+    } else {
+      navigate(`/stamp/${emirateId}/${stampId}`);
+    }
   };
 
   const getEmirateName = (id: string) => {

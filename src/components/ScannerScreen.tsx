@@ -54,40 +54,57 @@ const ScannerScreen: React.FC = () => {
       return;
     }
 
-    // Initialize scanner
-    const html5QrCode = new Html5Qrcode(scannerContainerId);
-    scannerRef.current = html5QrCode;
-
-    const qrConfig = {
-      fps: 10,
-      qrbox: { width: 250, height: 250 },
-      aspectRatio: 1
-    };
-
-    html5QrCode.start(
-      { facingMode: "environment" },
-      qrConfig,
-      (decodedText) => {
-        // Successfully scanned QR code
-        console.log(`Code scanned: ${decodedText}`);
-        handleQRCodeScanned(decodedText);
-        stopScanner();
-      },
-      (errorMessage) => {
-        // Error scanning QR code
-        console.error(`QR Code scanning error: ${errorMessage}`);
+    try {
+      // Make sure the scanner container exists
+      const scannerContainer = document.getElementById(scannerContainerId);
+      if (!scannerContainer) {
+        console.error('Scanner container not found');
+        return;
       }
-    ).catch(err => {
+
+      // Initialize scanner
+      const html5QrCode = new Html5Qrcode(scannerContainerId);
+      scannerRef.current = html5QrCode;
+      setIsScanning(true);
+
+      const qrConfig = {
+        fps: 10,
+        qrbox: { width: 250, height: 250 },
+        aspectRatio: 1
+      };
+
+      // Start the scanner
+      html5QrCode.start(
+        { facingMode: "environment" },
+        qrConfig,
+        (decodedText) => {
+          // Successfully scanned QR code
+          console.log(`Code scanned: ${decodedText}`);
+          handleQRCodeScanned(decodedText);
+          stopScanner();
+        },
+        (errorMessage) => {
+          // Error scanning QR code - this is normal during scanning, don't show toasts here
+          console.log(`QR Code scanning in progress: ${errorMessage}`);
+        }
+      ).catch(err => {
+        toast({
+          title: "Camera Error",
+          description: "Could not access your camera. Please check permissions.",
+          variant: "destructive"
+        });
+        console.error("Error starting scanner:", err);
+        setIsScanning(false); // Ensure button is reset if scan fails to start
+      });
+    } catch (error) {
+      console.error("Error in startScanner:", error);
       toast({
-        title: "Camera Error",
-        description: "Could not access your camera. Please check permissions.",
+        title: "Scanner Error",
+        description: "Failed to start the scanner. Please try again.",
         variant: "destructive"
       });
-      console.error("Error starting scanner:", err);
-      setIsScanning(false); // Ensure button is reset if scan fails to start
-    });
-
-    setIsScanning(true);
+      setIsScanning(false);
+    }
   };
 
   const stopScanner = () => {
