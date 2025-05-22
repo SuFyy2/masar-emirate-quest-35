@@ -58,13 +58,15 @@ const ScannerScreen: React.FC = () => {
     const html5QrCode = new Html5Qrcode(scannerContainerId);
     scannerRef.current = html5QrCode;
 
+    const qrConfig = {
+      fps: 10,
+      qrbox: { width: 250, height: 250 },
+      aspectRatio: 1
+    };
+
     html5QrCode.start(
       { facingMode: "environment" },
-      {
-        fps: 10,
-        qrbox: { width: 250, height: 250 },
-        aspectRatio: 1
-      },
+      qrConfig,
       (decodedText) => {
         // Successfully scanned QR code
         console.log(`Code scanned: ${decodedText}`);
@@ -82,6 +84,7 @@ const ScannerScreen: React.FC = () => {
         variant: "destructive"
       });
       console.error("Error starting scanner:", err);
+      setIsScanning(false); // Ensure button is reset if scan fails to start
     });
 
     setIsScanning(true);
@@ -94,7 +97,10 @@ const ScannerScreen: React.FC = () => {
         setIsScanning(false);
       }).catch(err => {
         console.error("Error stopping scanner:", err);
+        setIsScanning(false); // Ensure button is reset even if there's an error
       });
+    } else {
+      setIsScanning(false); // Fallback in case scanner reference isn't valid
     }
   };
 
@@ -124,6 +130,20 @@ const ScannerScreen: React.FC = () => {
   };
 
   const processStampData = (stampData: { emirateId: string, stampId: string, type: string }) => {
+    // For demo users, don't save any progress
+    if (isDemoUser) {
+      navigate('/stamp-earned', { 
+        state: { 
+          emirateId: stampData.emirateId,
+          stampId: stampData.stampId,
+          pointsEarned: 10,
+          totalPoints: 10,
+          isDemoScan: true
+        } 
+      });
+      return;
+    }
+    
     // Load existing collected stamps from localStorage
     const existingStampsJson = localStorage.getItem(getUserStorageKey('collectedStamps')) || '{}';
     let collectedStamps;
@@ -147,7 +167,7 @@ const ScannerScreen: React.FC = () => {
       toast({
         title: "Already Collected",
         description: "You've already collected this stamp!",
-        variant: "default" // Changed from "warning" to "default"
+        variant: "default"
       });
       return;
     }
@@ -187,26 +207,21 @@ const ScannerScreen: React.FC = () => {
       stampId: randomStampId
     };
     
-    if (isDemoUser) {
-      // For demo users, show the stamp experience but don't award points or save progress
-      toast({
-        title: "Demo Scan",
-        description: "This is a demo scan. In a real account, you would earn points!",
-      });
-      
-      navigate('/stamp-earned', { 
-        state: { 
-          emirateId: demoStampData.emirateId,
-          stampId: demoStampData.stampId,
-          pointsEarned: 10,
-          totalPoints: 10,
-          isDemoScan: true
-        } 
-      });
-    } else {
-      // For real users, process the stamp like a real scan
-      processStampData(demoStampData);
-    }
+    // Always show demo scan but never update progress
+    toast({
+      title: "Demo Scan",
+      description: "This is a demo scan. No points or progress will be saved.",
+    });
+    
+    navigate('/stamp-earned', { 
+      state: { 
+        emirateId: demoStampData.emirateId,
+        stampId: demoStampData.stampId,
+        pointsEarned: 10,
+        totalPoints: 10,
+        isDemoScan: true
+      } 
+    });
   };
 
   return (
