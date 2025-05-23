@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Map, Compass, User, Award, Gift } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Progress } from "@/components/ui/progress";
+import { supabase } from '@/integrations/supabase/client';
 
 // Helper function to get user-specific storage key
 const getUserStorageKey = (key: string): string => {
@@ -81,59 +82,91 @@ const HomeScreen: React.FC = () => {
   const [calculatedEmirateData, setCalculatedEmirateData] = useState(emitatesData);
   
   // Load user data and stamp information
-  const loadUserData = () => {
-    // Check if user is authenticated
-    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-    if (!isAuthenticated) {
-      // Not logged in, redirect to auth screen
-      navigate('/auth');
-      return;
-    }
-    
-    // Check if user is demo user or new user
-    const userName = localStorage.getItem('userName');
-    const isNewUser = !localStorage.getItem(getUserStorageKey('hasViewedHomeScreen'));
-    const isDemoUser = userName === 'Demo User';
-    
-    // Get user points - default to 0 if not found
-    const userPoints = parseInt(localStorage.getItem(getUserStorageKey('userPoints')) || '0', 10);
-    
-    if (isNewUser && !isDemoUser) {
-      // Mark that user has seen the home screen
-      localStorage.setItem(getUserStorageKey('hasViewedHomeScreen'), 'true');
-    }
-    
-    setUserData({
-      isNewUser,
-      isDemoUser,
-      points: userPoints
-    });
-    
-    // Load stamps data from localStorage
-    const storedStamps = localStorage.getItem(getUserStorageKey('collectedStamps'));
-    
-    if (storedStamps) {
-      try {
-        const stampsData = JSON.parse(storedStamps);
-        
-        // Calculate collected stamps for each emirate
-        const updatedEmirateData = emitatesData.map(emirate => {
-          const emirateStamps = stampsData[emirate.id] || [];
-          return {
-            ...emirate,
-            collectedStamps: emirateStamps.length
-          };
-        });
-        
-        setCalculatedEmirateData(updatedEmirateData);
-      } catch (error) {
-        console.error('Failed to parse stored stamps:', error);
-        // If parsing fails, reset to default data with 0 collected stamps
+  const loadUserData = async () => {
+    try {
+      // Check if user is authenticated
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        // Not logged in, redirect to auth screen
+        navigate('/auth');
+        return;
+      }
+      
+      // Check if user is demo user or new user
+      const userName = session.user.user_metadata.name || localStorage.getItem('userName');
+      const isNewUser = !localStorage.getItem(getUserStorageKey('hasViewedHomeScreen'));
+      const isDemoUser = userName === 'Demo User';
+      
+      // Get user points - first try from Supabase, fallback to localStorage
+      let userPoints = 0;
+      
+      if (!isDemoUser) {
+        try {
+          // Fetch points from Supabase profile
+          const { data: profileData, error } = await supabase
+            .from('profiles')
+            .select('points')
+            .eq('id', session.user.id)
+            .single();
+          
+          if (!error && profileData) {
+            userPoints = profileData.points || 0;
+          } else {
+            // Fallback to localStorage
+            userPoints = parseInt(localStorage.getItem(getUserStorageKey('userPoints')) || '0', 10);
+          }
+        } catch (error) {
+          console.error('Error fetching user points:', error);
+          // Fallback to localStorage
+          userPoints = parseInt(localStorage.getItem(getUserStorageKey('userPoints')) || '0', 10);
+        }
+      } else {
+        // Use localStorage for demo users
+        userPoints = parseInt(localStorage.getItem(getUserStorageKey('userPoints')) || '0', 10);
+      }
+      
+      if (isNewUser && !isDemoUser) {
+        // Mark that user has seen the home screen
+        localStorage.setItem(getUserStorageKey('hasViewedHomeScreen'), 'true');
+      }
+      
+      setUserData({
+        isNewUser,
+        isDemoUser,
+        points: userPoints
+      });
+      
+      // Load stamps data from localStorage
+      const storedStamps = localStorage.getItem(getUserStorageKey('collectedStamps'));
+      
+      if (storedStamps) {
+        try {
+          const stampsData = JSON.parse(storedStamps);
+          
+          // Calculate collected stamps for each emirate
+          const updatedEmirateData = emitatesData.map(emirate => {
+            const emirateStamps = stampsData[emirate.id] || [];
+            return {
+              ...emirate,
+              collectedStamps: emirateStamps.length
+            };
+          });
+          
+          setCalculatedEmirateData(updatedEmirateData);
+        } catch (error) {
+          console.error('Failed to parse stored stamps:', error);
+          // If parsing fails, reset to default data with 0 collected stamps
+          setCalculatedEmirateData(emitatesData);
+        }
+      } else {
+        // If no stored stamps, reset to default with 0 collected
         setCalculatedEmirateData(emitatesData);
       }
-    } else {
-      // If no stored stamps, reset to default with 0 collected
-      setCalculatedEmirateData(emitatesData);
+    } catch (error) {
+      console.error('Error in loadUserData:', error);
+      // If there's an error, redirect to auth
+      navigate('/auth');
     }
   };
 

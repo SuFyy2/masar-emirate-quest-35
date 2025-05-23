@@ -4,177 +4,187 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from '@/hooks/use-toast';
-
-// Helper function to get user-specific storage key
-const getUserStorageKey = (key: string, userEmail: string): string => {
-  return `${userEmail}_${key}`;
-};
-
-// Generate a simple session token
-const generateSessionToken = () => {
-  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-};
+import { supabase } from '@/integrations/supabase/client';
 
 const AuthScreen: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
   
   // Check if user is already authenticated on page load
   useEffect(() => {
-    const checkExistingSession = () => {
-      const sessionToken = localStorage.getItem('sessionToken');
-      const currentUserEmail = localStorage.getItem('currentUserEmail');
-      const isAuthenticated = localStorage.getItem('isAuthenticated');
-      
-      // If we have a session token and user email, try to resume the session
-      if (sessionToken && currentUserEmail && isAuthenticated === 'true') {
-        const storedUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-        const userExists = storedUsers.some((user: any) => user.email === currentUserEmail);
-        
-        if (userExists) {
-          // Valid session, redirect to home
-          navigate('/home');
-        } else {
-          // Invalid session, clear it
-          localStorage.removeItem('sessionToken');
-          localStorage.removeItem('currentUserEmail');
-          localStorage.removeItem('isAuthenticated');
+    const checkExistingSession = async () => {
+      // Set up auth state listener
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        (event, session) => {
+          if (session) {
+            // User is authenticated
+            localStorage.setItem('userName', session.user.user_metadata.name || '');
+            localStorage.setItem('isAuthenticated', 'true');
+            localStorage.setItem('currentUserEmail', session.user.email || '');
+            navigate('/home');
+          }
         }
+      );
+      
+      // Check for existing session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        // User is already authenticated, redirect
+        localStorage.setItem('userName', session.user.user_metadata.name || '');
+        localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('currentUserEmail', session.user.email || '');
+        navigate('/home');
       }
+      
+      return () => {
+        subscription.unsubscribe();
+      };
     };
     
     checkExistingSession();
   }, [navigate]);
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
 
-    // Simple validation
-    if (!email || !password || (!isLogin && !name)) {
+    try {
+      // Simple validation
+      if (!email || !password || (!isLogin && !name)) {
+        toast({
+          title: "Please fill in all fields",
+          variant: "destructive"
+        });
+        setLoading(false);
+        return;
+      }
+
+      if (isLogin) {
+        // Clean up any existing auth state
+        cleanupAuthState();
+        
+        // Attempt to sign in
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+        
+        if (error) throw error;
+        
+        if (data.user) {
+          toast({
+            title: "Login successful!",
+            description: "Welcome back to Masar"
+          });
+        }
+      } else {
+        // This is a sign up
+        // Clean up any existing auth state
+        cleanupAuthState();
+        
+        // Register the new user with Supabase
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              name: name,
+            }
+          }
+        });
+        
+        if (error) throw error;
+        
+        if (data.user) {
+          toast({
+            title: "Account created!",
+            description: "Welcome to Masar"
+          });
+        }
+      }
+    } catch (error: any) {
+      console.error('Authentication error:', error);
       toast({
-        title: "Please fill in all fields",
+        title: "Authentication failed",
+        description: error.message || "Please try again",
         variant: "destructive"
       });
-      return;
-    }
-
-    if (isLogin) {
-      // Check if this user has signed up before
-      const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-      const foundUser = registeredUsers.find((user: any) => user.email === email);
-      
-      if (!foundUser) {
-        toast({
-          title: "Account not found",
-          description: "Please sign up first",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      if (foundUser.password !== password) {
-        toast({
-          title: "Invalid password",
-          description: "Please check your password and try again",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      // Generate a session token
-      const sessionToken = generateSessionToken();
-      
-      // User exists, proceed with login and set the userName from the stored user data
-      localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('currentUserEmail', email);
-      localStorage.setItem('userName', foundUser.name);
-      localStorage.setItem('sessionToken', sessionToken);
-      
-      toast({
-        title: "Login successful!",
-        description: "Welcome back to Masar"
-      });
-      
-      // Navigate to home page
-      navigate('/home');
-    } else {
-      // This is a sign up
-      const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-      const userExists = registeredUsers.some((user: any) => user.email === email);
-      
-      if (userExists) {
-        toast({
-          title: "Email already registered",
-          description: "Please log in instead",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      // Generate a session token
-      const sessionToken = generateSessionToken();
-      
-      // Register the new user
-      const now = new Date();
-      const registeredAt = now.toISOString();
-      const joinDate = `${now.toLocaleString('default', { month: 'long' })} ${now.getFullYear()}`;
-      
-      registeredUsers.push({
-        email,
-        name,
-        password, // Note: In a real app, never store passwords in plaintext
-        registeredAt
-      });
-      
-      localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
-      localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('currentUserEmail', email);
-      localStorage.setItem('userName', name);
-      localStorage.setItem('sessionToken', sessionToken);
-      
-      // Initialize user data - make sure it's empty for new users
-      localStorage.setItem(getUserStorageKey('userJoinDate', email), joinDate);
-      localStorage.setItem(getUserStorageKey('userPoints', email), '0');
-      localStorage.setItem(getUserStorageKey('collectedStamps', email), '{}');
-      localStorage.setItem(getUserStorageKey('redeemedRewards', email), '[]');
-      
-      toast({
-        title: "Account created!",
-        description: "Welcome to Masar"
-      });
-      
-      // Navigate directly to home
-      navigate('/home');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleDemoLogin = () => {
-    // For demo purposes, skip login
-    const sessionToken = generateSessionToken();
-    localStorage.setItem('isAuthenticated', 'true');
-    localStorage.setItem('userName', 'Demo User');
-    localStorage.setItem('currentUserEmail', 'demo@example.com');
-    localStorage.setItem('sessionToken', sessionToken);
-    
-    // Reset progress tracking for demo user
-    localStorage.removeItem('hasViewedHomeScreen');
-    localStorage.removeItem('hasViewedProfileBefore');
-    localStorage.setItem('demo@example.com_userPoints', '0');
-    localStorage.setItem('demo@example.com_collectedStamps', '{}');
-    localStorage.setItem('demo@example.com_redeemedRewards', '[]');
-    
-    toast({
-      title: "Welcome, Demo User!",
-      description: "You're using a demo account with no progress"
+  // Helper function to clean up auth state
+  const cleanupAuthState = () => {
+    // Remove standard auth tokens
+    localStorage.removeItem('supabase.auth.token');
+    // Remove all Supabase auth keys from localStorage
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        localStorage.removeItem(key);
+      }
     });
-    
-    // Navigate directly to home
-    navigate('/home');
+  };
+
+  const handleDemoLogin = async () => {
+    setLoading(true);
+    try {
+      // Clean up any existing auth state
+      cleanupAuthState();
+      
+      // Demo credentials (you should change this to use actual demo account)
+      const demoEmail = "demo@example.com";
+      const demoPassword = "demopassword";
+      
+      // Create demo account if it doesn't exist
+      try {
+        const { data, error } = await supabase.auth.signUp({
+          email: demoEmail,
+          password: demoPassword,
+          options: {
+            data: {
+              name: 'Demo User',
+            }
+          }
+        });
+        
+        if (!error || error.message.includes('already registered')) {
+          // Either created or already exists, try to sign in
+          const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+            email: demoEmail,
+            password: demoPassword
+          });
+          
+          if (signInError) throw signInError;
+          
+          // Reset progress tracking for demo user
+          localStorage.removeItem('hasViewedHomeScreen');
+          localStorage.removeItem('hasViewedProfileBefore');
+          
+          toast({
+            title: "Welcome, Demo User!",
+            description: "You're using a demo account"
+          });
+        } else {
+          throw error;
+        }
+      } catch (error: any) {
+        console.error('Demo login error:', error);
+        toast({
+          title: "Demo login failed",
+          description: error.message || "Please try again",
+          variant: "destructive"
+        });
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -198,6 +208,7 @@ const AuthScreen: React.FC = () => {
                   value={name} 
                   onChange={e => setName(e.target.value)} 
                   className="bg-white border-masar-mint focus:border-masar-teal rounded-xl py-6" 
+                  disabled={loading}
                 />
               </div>
             )}
@@ -208,7 +219,8 @@ const AuthScreen: React.FC = () => {
                 placeholder="Email" 
                 value={email} 
                 onChange={e => setEmail(e.target.value)} 
-                className="bg-white border-masar-mint focus:border-masar-teal rounded-xl py-6" 
+                className="bg-white border-masar-mint focus:border-masar-teal rounded-xl py-6"
+                disabled={loading} 
               />
             </div>
             
@@ -218,15 +230,17 @@ const AuthScreen: React.FC = () => {
                 placeholder="Password" 
                 value={password} 
                 onChange={e => setPassword(e.target.value)} 
-                className="bg-white border-masar-mint focus:border-masar-teal rounded-xl py-6" 
+                className="bg-white border-masar-mint focus:border-masar-teal rounded-xl py-6"
+                disabled={loading}
               />
             </div>
             
             <Button 
               type="submit" 
               className="w-full bg-masar-teal hover:bg-masar-teal/90 text-white rounded-xl py-6 h-auto font-medium text-lg"
+              disabled={loading}
             >
-              {isLogin ? 'Log In' : 'Sign Up'}
+              {loading ? "Please wait..." : isLogin ? 'Log In' : 'Sign Up'}
             </Button>
           </form>
           
@@ -235,6 +249,7 @@ const AuthScreen: React.FC = () => {
               variant="link" 
               onClick={() => setIsLogin(!isLogin)} 
               className="text-masar-teal hover:text-masar-teal/80"
+              disabled={loading}
             >
               {isLogin ? "Don't have an account? Sign up" : "Already have an account? Log in"}
             </Button>
@@ -245,6 +260,7 @@ const AuthScreen: React.FC = () => {
               variant="link" 
               onClick={handleDemoLogin} 
               className="text-masar-gold hover:text-masar-gold/80"
+              disabled={loading}
             >
               Continue as Demo User
             </Button>
