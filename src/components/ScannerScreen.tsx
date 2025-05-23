@@ -55,16 +55,38 @@ const ScannerScreen: React.FC = () => {
     }
 
     try {
-      // Make sure the scanner container exists
+      // Make sure the scanner container exists and is empty before initializing
       const scannerContainer = document.getElementById(scannerContainerId);
       if (!scannerContainer) {
         console.error('Scanner container not found');
+        toast({
+          title: "Scanner Error",
+          description: "Scanner container not found. Please try again.",
+          variant: "destructive"
+        });
         return;
       }
 
+      // Clear any previous instances
+      if (scannerRef.current) {
+        if (scannerRef.current.isScanning) {
+          scannerRef.current.stop().catch(console.error);
+        }
+        scannerRef.current = null;
+      }
+
+      console.log("Initializing scanner...");
       // Initialize scanner
       const html5QrCode = new Html5Qrcode(scannerContainerId);
       scannerRef.current = html5QrCode;
+
+      // Show a toast to indicate that permissions might be requested
+      toast({
+        title: "Camera Access",
+        description: "Please allow camera access when prompted",
+      });
+
+      // Set scanning state to true before starting the scanner
       setIsScanning(true);
 
       const qrConfig = {
@@ -73,7 +95,8 @@ const ScannerScreen: React.FC = () => {
         aspectRatio: 1
       };
 
-      // Start the scanner
+      console.log("Starting scanner...");
+      // Start the scanner with explicit camera access request
       html5QrCode.start(
         { facingMode: "environment" },
         qrConfig,
@@ -88,12 +111,12 @@ const ScannerScreen: React.FC = () => {
           console.log(`QR Code scanning in progress: ${errorMessage}`);
         }
       ).catch(err => {
+        console.error("Error starting scanner:", err);
         toast({
           title: "Camera Error",
           description: "Could not access your camera. Please check permissions.",
           variant: "destructive"
         });
-        console.error("Error starting scanner:", err);
         setIsScanning(false); // Ensure button is reset if scan fails to start
       });
     } catch (error) {
@@ -108,14 +131,19 @@ const ScannerScreen: React.FC = () => {
   };
 
   const stopScanner = () => {
-    if (scannerRef.current && scannerRef.current.isScanning) {
-      scannerRef.current.stop().then(() => {
-        console.log('Scanner stopped');
-        setIsScanning(false);
-      }).catch(err => {
-        console.error("Error stopping scanner:", err);
-        setIsScanning(false); // Ensure button is reset even if there's an error
-      });
+    console.log("Stopping scanner...");
+    if (scannerRef.current) {
+      if (scannerRef.current.isScanning) {
+        scannerRef.current.stop().then(() => {
+          console.log('Scanner stopped');
+          setIsScanning(false);
+        }).catch(err => {
+          console.error("Error stopping scanner:", err);
+          setIsScanning(false); // Ensure button is reset even if there's an error
+        });
+      } else {
+        setIsScanning(false); // If not scanning, just reset the state
+      }
     } else {
       setIsScanning(false); // Fallback in case scanner reference isn't valid
     }
