@@ -46,6 +46,13 @@ function App() {
         if (event === 'SIGNED_OUT') {
           setIsAuthenticated(false);
           setShowSplash(true);
+          // Clear local storage data
+          localStorage.removeItem('isAuthenticated');
+          localStorage.removeItem('userName');
+          localStorage.removeItem('currentUserEmail');
+          localStorage.removeItem('hasViewedHomeScreen');
+          localStorage.removeItem('hasViewedProfileBefore');
+          // We don't need to navigate here as the route protection below will handle it
         }
       }
     );
@@ -97,18 +104,18 @@ function App() {
     <Router>
       <div className="App">
         <Routes>
-          <Route path="/" element={showSplash ? <SplashScreen onComplete={handleSplashComplete} /> : <Navigate to="/home" replace />} />
+          <Route path="/" element={showSplash ? <SplashScreen onComplete={handleSplashComplete} /> : isAuthenticated ? <Navigate to="/home" replace /> : <Navigate to="/auth" replace />} />
           <Route path="/onboarding" element={<OnboardingScreen />} />
           <Route path="/auth" element={isAuthenticated ? <Navigate to="/home" replace /> : <AuthScreen />} />
           <Route path="/login" element={<Navigate to="/auth" replace />} /> {/* Redirect /login to /auth */}
-          <Route path="/home" element={<HomeScreen />} />
-          <Route path="/passport" element={<PassportScreen />} />
-          <Route path="/passport/:emirateId" element={<PassportScreen />} />
-          <Route path="/stamp/:emirateId/:stampId" element={<StampDetailScreen />} />
-          <Route path="/profile" element={<ProfileScreen />} />
-          <Route path="/scan" element={<ScannerScreen />} />
-          <Route path="/stamp-earned" element={<StampEarnedScreen />} />
-          <Route path="/rewards" element={<RewardsScreen />} />
+          <Route path="/home" element={isAuthenticated ? <HomeScreen /> : <Navigate to="/auth" replace />} />
+          <Route path="/passport" element={isAuthenticated ? <PassportScreen /> : <Navigate to="/auth" replace />} />
+          <Route path="/passport/:emirateId" element={isAuthenticated ? <PassportScreen /> : <Navigate to="/auth" replace />} />
+          <Route path="/stamp/:emirateId/:stampId" element={isAuthenticated ? <StampDetailScreen /> : <Navigate to="/auth" replace />} />
+          <Route path="/profile" element={isAuthenticated ? <ProfileScreen /> : <Navigate to="/auth" replace />} />
+          <Route path="/scan" element={isAuthenticated ? <ScannerScreen /> : <Navigate to="/auth" replace />} />
+          <Route path="/stamp-earned" element={isAuthenticated ? <StampEarnedScreen /> : <Navigate to="/auth" replace />} />
+          <Route path="/rewards" element={isAuthenticated ? <RewardsScreen /> : <Navigate to="/auth" replace />} />
         </Routes>
         <Toaster />
       </div>

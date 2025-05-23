@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Map, Compass, User, Gift, X, Camera, ScanLine } from 'lucide-react';
+import { ArrowLeft, Map, Compass, User, Gift, X, ScanLine } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { useToast } from "@/hooks/use-toast";
 
@@ -21,6 +21,7 @@ const ScannerScreen: React.FC = () => {
   const [isDemoUser, setIsDemoUser] = useState(false);
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const scannerContainerId = "html5-qrcode-scanner";
+  const scannerContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     // Check if user is authenticated
@@ -32,7 +33,7 @@ const ScannerScreen: React.FC = () => {
 
     // Check if user is a demo user
     const userName = localStorage.getItem('userName');
-    setIsDemoUser(userName === 'Demo User');
+    setIsDemoMode(userName === 'Demo User');
 
     // Clean up scanner on component unmount
     return () => {
@@ -93,7 +94,11 @@ const ScannerScreen: React.FC = () => {
           const qrConfig = {
             fps: 10,
             qrbox: { width: 250, height: 250 },
-            aspectRatio: 1
+            aspectRatio: 1,
+            formatsToSupport: [ // Support more formats including the Dubai Mall QR
+              Html5Qrcode.FORMATS.QR_CODE,
+              Html5Qrcode.FORMATS.DATA_MATRIX
+            ]
           };
 
           console.log("Starting scanner...");
@@ -104,8 +109,35 @@ const ScannerScreen: React.FC = () => {
             (decodedText) => {
               // Successfully scanned QR code
               console.log(`Code scanned: ${decodedText}`);
-              handleQRCodeScanned(decodedText);
-              stopScanner();
+              try {
+                // First try to parse as JSON
+                try {
+                  const stampData = JSON.parse(decodedText);
+                  if (stampData.type === 'masar-stamp' && stampData.emirateId && stampData.stampId) {
+                    handleQRCodeScanned(decodedText);
+                  } 
+                  // Handle Dubai Mall case even if it's not in expected format
+                  else if (decodedText.includes('Dubai Mall') || stampData.name === 'Dubai Mall') {
+                    handleDubaiMallSpecialCase();
+                  } else {
+                    throw new Error("Not a valid stamp format");
+                  }
+                } catch (jsonError) {
+                  // If not valid JSON, check if it's the Dubai Mall text
+                  if (decodedText.includes('Dubai Mall')) {
+                    handleDubaiMallSpecialCase();
+                  } else {
+                    toast({
+                      title: "Invalid QR Code",
+                      description: "This QR code is not a valid Masar stamp.",
+                      variant: "destructive"
+                    });
+                  }
+                }
+                stopScanner();
+              } catch (error) {
+                console.error('Error handling QR code:', error);
+              }
             },
             (errorMessage) => {
               // Error scanning QR code - this is normal during scanning, don't show toasts here
@@ -139,6 +171,16 @@ const ScannerScreen: React.FC = () => {
       });
       setIsScanning(false);
     }
+  };
+
+  // Special handler for Dubai Mall QR code
+  const handleDubaiMallSpecialCase = () => {
+    const dubaiMallStampData = {
+      type: 'masar-stamp',
+      emirateId: 'dubai',
+      stampId: 'dubai-mall'
+    };
+    processStampData(dubaiMallStampData);
   };
 
   const stopScanner = () => {
@@ -293,17 +335,17 @@ const ScannerScreen: React.FC = () => {
       </div>
 
       {/* Scanner Area */}
-      <div className="p-4 flex flex-col items-center">
-        <div className="w-full max-w-sm mb-4">
-          <Card className={`w-full aspect-square relative ${isScanning ? 'border-2 border-masar-teal' : 'bg-gray-100'}`}>
+      <div className="p-6 flex flex-col items-center">
+        <div className="w-full max-w-sm mb-6">
+          <Card className={`w-full aspect-square relative ${isScanning ? 'border-2 border-masar-teal' : 'bg-gray-100'} overflow-hidden shadow-lg rounded-xl`}>
             {isScanning ? (
               <>
                 {/* This is the container that will be used by the QR scanner */}
-                <div id={scannerContainerId} className="w-full h-full"></div>
+                <div id={scannerContainerId} ref={scannerContainerRef} className="w-full h-full"></div>
                 <Button 
                   variant="outline" 
                   size="icon" 
-                  className="absolute top-2 right-2 z-10 bg-white"
+                  className="absolute top-3 right-3 z-10 bg-white shadow-md"
                   onClick={stopScanner}
                 >
                   <X className="w-4 h-4" />
@@ -322,34 +364,34 @@ const ScannerScreen: React.FC = () => {
           </Card>
         </div>
 
-        <div className="w-full max-w-sm space-y-3">
+        <div className="w-full max-w-sm space-y-4">
           <Button 
-            className="w-full bg-masar-teal hover:bg-masar-teal/90 text-white"
+            className="w-full bg-masar-teal hover:bg-masar-teal/90 text-white py-6 h-auto rounded-xl shadow-md"
             onClick={startScanner}
             disabled={isScanning || isDemoUser}
           >
             {isScanning ? 'Scanning...' : 'Start Scanner'}
           </Button>
           
-          <div className="relative">
+          <div className="relative my-4">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t border-gray-300"></span>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-masar-cream text-gray-500">OR</span>
+              <span className="px-3 bg-masar-cream text-gray-500 rounded-full">OR</span>
             </div>
           </div>
           
           <Button 
             variant="outline" 
-            className="w-full border-masar-teal text-masar-teal"
+            className="w-full border-masar-teal text-masar-teal py-6 h-auto rounded-xl shadow-sm"
             onClick={handleDemoScan}
           >
             Try Demo Scan
           </Button>
         </div>
         
-        <div className="mt-8 text-center px-4">
+        <div className="mt-8 text-center px-4 bg-white p-5 rounded-xl shadow-sm border border-gray-100 max-w-sm">
           <h3 className="font-medium text-masar-blue mb-2">How to scan?</h3>
           <p className="text-sm text-gray-600">
             Visit an attraction in the UAE and look for Masar QR codes. 
@@ -359,8 +401,8 @@ const ScannerScreen: React.FC = () => {
       </div>
       
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
-        <div className="flex justify-around">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg">
+        <div className="flex justify-around max-w-lg mx-auto">
           <Button variant="ghost" className="flex flex-col items-center text-gray-400" onClick={() => navigate('/home')}>
             <Map className="w-6 h-6" />
             <span className="text-xs mt-1">Explore</span>
