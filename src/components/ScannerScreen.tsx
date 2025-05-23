@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Map, Compass, User, Gift, X, Camera } from 'lucide-react';
+import { ArrowLeft, Map, Compass, User, Gift, X, Camera, ScanLine } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { useToast } from "@/hooks/use-toast";
 
@@ -20,7 +20,7 @@ const ScannerScreen: React.FC = () => {
   const [isScanning, setIsScanning] = useState(false);
   const [isDemoUser, setIsDemoUser] = useState(false);
   const scannerRef = useRef<Html5Qrcode | null>(null);
-  const scannerContainerId = "scanner-container";
+  const scannerContainerId = "html5-qrcode-scanner";
 
   useEffect(() => {
     // Check if user is authenticated
@@ -55,70 +55,81 @@ const ScannerScreen: React.FC = () => {
     }
 
     try {
-      // Make sure the scanner container exists and is empty before initializing
-      const scannerContainer = document.getElementById(scannerContainerId);
-      if (!scannerContainer) {
-        console.error('Scanner container not found');
-        toast({
-          title: "Scanner Error",
-          description: "Scanner container not found. Please try again.",
-          variant: "destructive"
-        });
-        return;
+      // First ensure we don't have a scanning session already active
+      if (scannerRef.current && scannerRef.current.isScanning) {
+        scannerRef.current.stop().catch(console.error);
       }
-
-      // Clear any previous instances
-      if (scannerRef.current) {
-        if (scannerRef.current.isScanning) {
-          scannerRef.current.stop().catch(console.error);
-        }
-        scannerRef.current = null;
-      }
-
-      console.log("Initializing scanner...");
-      // Initialize scanner
-      const html5QrCode = new Html5Qrcode(scannerContainerId);
-      scannerRef.current = html5QrCode;
-
-      // Show a toast to indicate that permissions might be requested
-      toast({
-        title: "Camera Access",
-        description: "Please allow camera access when prompted",
-      });
-
-      // Set scanning state to true before starting the scanner
+      
+      // Reset isScanning to create fresh UI state
       setIsScanning(true);
-
-      const qrConfig = {
-        fps: 10,
-        qrbox: { width: 250, height: 250 },
-        aspectRatio: 1
-      };
-
-      console.log("Starting scanner...");
-      // Start the scanner with explicit camera access request
-      html5QrCode.start(
-        { facingMode: "environment" },
-        qrConfig,
-        (decodedText) => {
-          // Successfully scanned QR code
-          console.log(`Code scanned: ${decodedText}`);
-          handleQRCodeScanned(decodedText);
-          stopScanner();
-        },
-        (errorMessage) => {
-          // Error scanning QR code - this is normal during scanning, don't show toasts here
-          console.log(`QR Code scanning in progress: ${errorMessage}`);
+      
+      // Add a small delay to ensure DOM elements are created before scanner init
+      setTimeout(() => {
+        // Check if scanner container exists after the state update
+        const scannerContainer = document.getElementById(scannerContainerId);
+        if (!scannerContainer) {
+          console.error('Scanner container not found after delay');
+          toast({
+            title: "Scanner Error",
+            description: "Scanner container not found. Please try again.",
+            variant: "destructive"
+          });
+          setIsScanning(false);
+          return;
         }
-      ).catch(err => {
-        console.error("Error starting scanner:", err);
-        toast({
-          title: "Camera Error",
-          description: "Could not access your camera. Please check permissions.",
-          variant: "destructive"
-        });
-        setIsScanning(false); // Ensure button is reset if scan fails to start
-      });
+
+        // Initialize scanner
+        try {
+          console.log("Initializing scanner...");
+          const html5QrCode = new Html5Qrcode(scannerContainerId);
+          scannerRef.current = html5QrCode;
+
+          // Show a toast to indicate that permissions might be requested
+          toast({
+            title: "Camera Access",
+            description: "Please allow camera access when prompted",
+          });
+
+          const qrConfig = {
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1
+          };
+
+          console.log("Starting scanner...");
+          // Start the scanner with explicit camera access request
+          html5QrCode.start(
+            { facingMode: "environment" },
+            qrConfig,
+            (decodedText) => {
+              // Successfully scanned QR code
+              console.log(`Code scanned: ${decodedText}`);
+              handleQRCodeScanned(decodedText);
+              stopScanner();
+            },
+            (errorMessage) => {
+              // Error scanning QR code - this is normal during scanning, don't show toasts here
+              console.log(`QR Code scanning in progress: ${errorMessage}`);
+            }
+          ).catch(err => {
+            console.error("Error starting scanner:", err);
+            toast({
+              title: "Camera Error",
+              description: "Could not access your camera. Please check permissions.",
+              variant: "destructive"
+            });
+            setIsScanning(false); // Ensure button is reset if scan fails to start
+          });
+        } catch (error) {
+          console.error("Error initializing scanner:", error);
+          toast({
+            title: "Scanner Error",
+            description: "Failed to initialize the scanner. Please try again.",
+            variant: "destructive"
+          });
+          setIsScanning(false);
+        }
+      }, 300); // Short delay to ensure DOM is ready
     } catch (error) {
       console.error("Error in startScanner:", error);
       toast({
@@ -287,7 +298,8 @@ const ScannerScreen: React.FC = () => {
           <Card className={`w-full aspect-square relative ${isScanning ? 'border-2 border-masar-teal' : 'bg-gray-100'}`}>
             {isScanning ? (
               <>
-                <div id={scannerContainerId} className="absolute inset-0"></div>
+                {/* This is the container that will be used by the QR scanner */}
+                <div id={scannerContainerId} className="w-full h-full"></div>
                 <Button 
                   variant="outline" 
                   size="icon" 
@@ -299,7 +311,7 @@ const ScannerScreen: React.FC = () => {
               </>
             ) : (
               <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
-                <Camera className="w-16 h-16 text-gray-400 mb-4" />
+                <ScanLine className="w-16 h-16 text-gray-400 mb-4" />
                 <p className="text-center text-gray-500 mb-4">
                   {isDemoUser 
                     ? "Camera access is restricted in demo mode. Try the demo scan instead."
